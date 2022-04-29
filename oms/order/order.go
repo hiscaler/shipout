@@ -10,7 +10,7 @@ import (
 // 订单
 // https://open.shipout.com/portal/zh/api/order.html
 
-type Order struct {
+type BatchSubmitResult struct {
 	OrderId       string   `json:"order_id"`
 	OrderNo       string   `json:"orderNo"`
 	FulfillResult []string `json:"fulfillResult"`
@@ -96,14 +96,14 @@ func (m BatchSubmitOrderRequest) Validate() error {
 	)
 }
 
-func (s service) BatchSubmit(req BatchSubmitOrderRequest) (items []Order, err error) {
+func (s service) BatchSubmit(req BatchSubmitOrderRequest) (items []BatchSubmitResult, err error) {
 	if err = req.Validate(); err != nil {
 		return
 	}
 
 	res := struct {
 		shipout.NormalResponse
-		Data []Order `json:"data"`
+		Data []BatchSubmitResult `json:"data"`
 	}{}
 
 	resp, err := s.shipOut.Client.R().SetBody(req).Post("/open-api/oms/order/batchSubmit")
@@ -114,6 +114,74 @@ func (s service) BatchSubmit(req BatchSubmitOrderRequest) (items []Order, err er
 	if resp.IsSuccess() {
 		if err = shipout.ErrorWrap(res.ErrorCode, res.Message); err == nil {
 			items = res.Data
+		}
+	} else {
+		if e := jsoniter.Unmarshal(resp.Body(), &res); e == nil {
+			err = shipout.ErrorWrap(res.ErrorCode, res.Message)
+		} else {
+			err = errors.New(resp.Status())
+		}
+	}
+	return
+}
+
+// 单个订单查询
+// OrderRecipient 收货人信息
+type OrderRecipient struct {
+	AddressLine1 string `json:"addressLine1"` // 收件人地址行1
+	AddressLine2 string `json:"addressLine2"` // 收件人地址行2
+	City         string `json:"city"`         // 城市
+	Company      string `json:"company"`      // 收件人公司
+	CountryCode  string `json:"countryCode"`  // 国家编码，格式标准遵循ISO 3166-1 alpha-2
+	Email        string `json:"email"`        // 收件人邮箱
+	Name         string `json:"name"`         // 收件人姓名
+	Phone        string `json:"phone"`        // 收件人联系电话
+	Residential  bool   `json:"residential"`  //
+	StateCode    string `json:"stateCode"`    // 州代码，美国为两位大写，如CA、NY
+	ZipCode      string `json:"zipCode"`      // 邮政编码
+}
+
+// OrderShipment 发货信息
+type OrderShipment struct {
+}
+
+type Order struct {
+	OrderId        string          `json:"orderId"`        // 订单 ID
+	OrderRecipient OrderRecipient  `json:"orderRecipient"` // 收货人信息
+	OrderShipments []OrderShipment `json:"orderShipments"` // 发货列表
+	OrderSummary   []OrderSummary  `json:"orderSummary"`   // 订单摘要
+	Status         int             `json:"status"`         // 状态
+}
+
+type OrderQueryParams struct {
+	Name    string `json:"name,omitempty"`
+	OrderId string `json:"orderId"`
+}
+
+func (m OrderQueryParams) Validate() error {
+	return validation.ValidateStruct(&m,
+		validation.Field(&m.OrderId, validation.Required.Error("订单 ID 不能为空")),
+	)
+}
+
+func (s service) Order(params OrderQueryParams) (item BatchSubmitResult, err error) {
+	if err = params.Validate(); err != nil {
+		return
+	}
+
+	res := struct {
+		shipout.NormalResponse
+		Data BatchSubmitResult `json:"data"`
+	}{}
+
+	resp, err := s.shipOut.Client.R().SetBody(params).Get("/open-api/oms/order/query")
+	if err != nil {
+		return
+	}
+
+	if resp.IsSuccess() {
+		if err = shipout.ErrorWrap(res.ErrorCode, res.Message); err == nil {
+			item = res.Data
 		}
 	} else {
 		if e := jsoniter.Unmarshal(resp.Body(), &res); e == nil {

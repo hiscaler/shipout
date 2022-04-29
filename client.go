@@ -4,10 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-resty/resty/v2"
+	"github.com/hiscaler/gox/cryptox"
 	"github.com/hiscaler/shipout-go/config"
 	jsoniter "github.com/json-iterator/go"
 	"log"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -35,7 +37,7 @@ type ShipOut struct {
 
 func NewShipOut(config config.Config) *ShipOut {
 	logger := log.New(os.Stdout, "[ ShipOut ] ", log.LstdFlags|log.Llongfile)
-	ttInstance := &ShipOut{
+	soInstance := &ShipOut{
 		Debug:  config.Debug,
 		Logger: logger,
 		QueryDefaultValues: queryDefaultValues{
@@ -43,22 +45,37 @@ func NewShipOut(config config.Config) *ShipOut {
 			PageSize: 100,
 		},
 	}
-	timestamp := time.Now().UnixMicro()
-	sign := ""
 	client := resty.New().
 		SetDebug(config.Debug).
 		SetBaseURL("https://open.shipout.com/api/").
 		SetHeaders(map[string]string{
-			"Content-Type":  "application/json",
-			"Accept":        "application/json",
-			"Authorization": config.Authorization,
-			"timestamp":     strconv.Itoa(int(timestamp)),
-			"appKey":        config.AppKey,
-			"sign":          sign,
-			"version":       "1.0.0",
+			"Content-Type": "application/json",
+			"Accept":       "application/json",
+			"appKey":       config.AppKey,
 		}).
+		SetAuthToken(config.Authorization).
 		SetTimeout(10 * time.Second).
 		OnBeforeRequest(func(client *resty.Client, request *resty.Request) error {
+			headers := map[string]string{
+				"timestamp": strconv.Itoa(int(time.Now().UnixMicro())),
+				"version":   "1.0.0",
+				"path":      request.URL,
+			}
+			keys := make([]string, len(headers))
+			i := 0
+			for k := range headers {
+				keys[i] = k
+				i++
+			}
+			sort.Strings(keys)
+			sb := strings.Builder{}
+			for _, key := range keys {
+				sb.WriteString(key)
+				sb.WriteString(headers[key])
+			}
+			sb.WriteString(config.SecretKey)
+			headers["sign"] = strings.ToUpper(cryptox.Md5(sb.String()))
+			request.SetHeaders(headers)
 			return nil
 		})
 	if config.Debug {
@@ -67,8 +84,8 @@ func NewShipOut(config config.Config) *ShipOut {
 	}
 	client.JSONMarshal = jsoniter.Marshal
 	client.JSONUnmarshal = jsoniter.Unmarshal
-	ttInstance.Client = client
-	return ttInstance
+	soInstance.Client = client
+	return soInstance
 }
 
 // NormalResponse Normal API response
