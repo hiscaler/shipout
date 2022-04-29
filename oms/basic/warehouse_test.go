@@ -1,4 +1,4 @@
-package order
+package basic
 
 import (
 	"fmt"
@@ -29,30 +29,11 @@ func TestMain(m *testing.M) {
 }
 
 func TestOrders(t *testing.T) {
-	params := OrdersQueryParams{
-		CurPageNo: 1,
-		PageSize:  100,
-	}
-	body := OrdersQueryBody{
-		OrgId:       "",
-		ServerOrgId: "",
-		Status:      9,
-		WarehouseId: "",
-	}
-	orders, _, err := soService.Orders(params, body)
+	params := WarehousesQueryParams{}
+	warehouses, _, err := soService.Warehouses(params)
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		fmt.Println(fmt.Sprintf("%#v", orders))
-	}
-}
-
-func TestOrder(t *testing.T) {
-	params := OrderQueryParams{OrderId: "1"}
-	order, err := soService.Order(params)
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		fmt.Println(fmt.Sprintf("%#v", order))
+		fmt.Println(fmt.Sprintf("%#v", warehouses))
 	}
 }

@@ -54,6 +54,7 @@ func NewShipOut(config config.Config) *ShipOut {
 			"appKey":       config.AppKey,
 		}).
 		SetAuthToken(config.Authorization).
+		SetAllowGetMethodPayload(true).
 		SetTimeout(10 * time.Second).
 		OnBeforeRequest(func(client *resty.Client, request *resty.Request) error {
 			headers := map[string]string{
@@ -77,6 +78,21 @@ func NewShipOut(config config.Config) *ShipOut {
 			headers["sign"] = strings.ToUpper(cryptox.Md5(sb.String()))
 			request.SetHeaders(headers)
 			return nil
+		}).
+		OnAfterResponse(func(client *resty.Client, response *resty.Response) (err error) {
+			if response.IsSuccess() {
+				r := struct {
+					Result  string `json:"result"`
+					Message string `json:"message"`
+				}{}
+				if err = jsoniter.Unmarshal(response.Body(), &r); err == nil {
+					err = ErrorWrap(r.Result, r.Message)
+				}
+			}
+			if err != nil {
+				logger.Printf("OnAfterResponse error: %s", err.Error())
+			}
+			return
 		})
 	if config.Debug {
 		client.SetBaseURL("https://opendev.shipout.com/api/")

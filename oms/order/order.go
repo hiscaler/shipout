@@ -125,7 +125,99 @@ func (s service) BatchSubmit(req BatchSubmitOrderRequest) (items []BatchSubmitRe
 	return
 }
 
+// 订单列表
+
+type OrdersResRecordShipment struct {
+	FeesDetail     string  `json:"feesDetail"`     // 金额详情，格式为{“费用名”: 金额，“费用名”: 金额}
+	LabelStatus    int     `json:"labelStatus"`    // label状态：0,1,2,3,4,5：无须打单,未打单,已打单,运输中,已运输,异常
+	OutboundStatus int     `json:"outboundStatus"` // 0,1,2,3,4：无须建立出库单,未建立,已建立,仓库处理中,已发货
+	OutbundingId   string  `json:"outbundingId"`   // outbundingId
+	Rate           float64 `json:"rate"`           // 金额
+	ShipmentId     string  `json:"shipmentId"`     // shipmentId
+	ShippingRate   float64 `json:"shippingRate"`   // 物流金额
+	TrackingNumber string  `json:"trackingNumber"` // 物流追踪号
+	WarehouseId    string  `json:"warehouseId"`    // 仓库编号
+}
+
+type OrdersResRecord struct {
+	FulfillCharge  float64                   `json:"fulfillCharge"` // 总金额,完成计费后才会有
+	OrderDate      string                    `json:"orderDate"`     // 订单日期
+	OrderId        string                    `json:"orderId"`
+	OrderNO        string                    `json:"orderNO"`
+	RecipientName  string                    `json:"recipientName"`
+	ShipTo         string                    `json:"shipTo"`
+	ShipmentList   []OrdersResRecordShipment `json:"shipmentList"`
+	ShippingCharge float64                   `json:"shippingCharge"` // 运费总金额,打单后就会有
+	Status         int                       `json:"status"`         // 状态
+	ZipCode        string                    `json:"zipCode"`        // 邮编
+}
+type OrdersRes struct {
+	CountId          string `json:"countId"`
+	Current          int    `json:"current"`
+	HitCount         bool   `json:"hitCount"`
+	MaxLimit         int    `json:"maxLimit"`
+	OptimizeCountSQL bool   `json:"optimizeCountSql"`
+	Pages            int    `json:"pages"`
+	SearchCount      bool   `json:"searchCount"`
+	Size             int    `json:"size"`
+	Total            int    `json:"total"`
+}
+
+type OrdersQueryParams struct {
+	Asc         bool   `json:"asc"`
+	CurPageNo   int    `json:"curPageNo"`
+	HiDirection string `json:"hiDirection"`
+	Name        string `json:"name"`
+	OrderColumn string `json:"orderColumn"`
+	PageSize    int    `json:"pageSize"`
+}
+
+func (m OrdersQueryParams) Validate() error {
+	return nil
+}
+
+type OrdersQueryBody struct {
+	OrgId       string `json:"orgId"`
+	ServerOrgId string `json:"serverOrgId"`
+	Status      int    `json:"status"`
+	WarehouseId string `json:"warehouseId"`
+}
+
+func (s service) Orders(params OrdersQueryParams, body OrdersQueryBody) (items []OrdersRes, isLastPage bool, err error) {
+	if err = params.Validate(); err != nil {
+		return
+	}
+
+	res := struct {
+		shipout.NormalResponse
+		Data []OrdersRes `json:"data"`
+	}{}
+	resp, err := s.shipOut.Client.R().
+		SetQueryParams(map[string]string{"pageSize": "100", "curPageNo": "1"}).
+		SetBody(&body).
+		Get("/open-api/oms/order/queryList")
+	if err != nil {
+		return
+	}
+
+	if resp.IsSuccess() {
+		if err = shipout.ErrorWrap(res.Result, res.Message); err == nil {
+			if err = jsoniter.Unmarshal(resp.Body(), &res); err == nil {
+				items = res.Data
+			}
+		}
+	} else {
+		if e := jsoniter.Unmarshal(resp.Body(), &res); e == nil {
+			err = shipout.ErrorWrap(res.Result, res.Message)
+		} else {
+			err = errors.New(resp.Status())
+		}
+	}
+	return
+}
+
 // 单个订单查询
+
 // OrderRecipient 收货人信息
 type OrderRecipient struct {
 	AddressLine1 string `json:"addressLine1"` // 收件人地址行1
@@ -164,14 +256,14 @@ func (m OrderQueryParams) Validate() error {
 	)
 }
 
-func (s service) Order(params OrderQueryParams) (item BatchSubmitResult, err error) {
+func (s service) Order(params OrderQueryParams) (item Order, err error) {
 	if err = params.Validate(); err != nil {
 		return
 	}
 
 	res := struct {
 		shipout.NormalResponse
-		Data BatchSubmitResult `json:"data"`
+		Data Order `json:"data"`
 	}{}
 
 	resp, err := s.shipOut.Client.R().SetBody(params).Get("/open-api/oms/order/query")
