@@ -2,6 +2,7 @@ package basic
 
 import (
 	"fmt"
+	"github.com/hiscaler/gox/jsonx"
 	"github.com/hiscaler/shipout-go"
 	"github.com/hiscaler/shipout-go/config"
 	jsoniter "github.com/json-iterator/go"
@@ -32,8 +33,8 @@ func TestOrders(t *testing.T) {
 	params := WarehousesQueryParams{}
 	warehouses, _, err := soService.Warehouses(params)
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf(err.Error())
 	} else {
-		fmt.Println(fmt.Sprintf("%#v", warehouses))
+		fmt.Println(jsonx.ToPrettyJson(warehouses))
 	}
 }

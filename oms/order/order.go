@@ -4,6 +4,7 @@ import (
 	"errors"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/hiscaler/shipout-go"
+	"github.com/hiscaler/shipout-go/pkg/cast"
 	jsoniter "github.com/json-iterator/go"
 )
 
@@ -164,12 +165,12 @@ type OrdersRes struct {
 }
 
 type OrdersQueryParams struct {
-	Asc         bool   `json:"asc"`
-	CurPageNo   int    `json:"curPageNo"`
-	HiDirection string `json:"hiDirection"`
-	Name        string `json:"name"`
-	OrderColumn string `json:"orderColumn"`
-	PageSize    int    `json:"pageSize"`
+	Asc         bool   `json:"asc,omitempty"`
+	CurPageNo   int    `json:"curPageNo,omitempty"`
+	HiDirection string `json:"hiDirection,omitempty"`
+	Name        string `json:"name,omitempty"`
+	OrderColumn string `json:"orderColumn,omitempty"`
+	PageSize    int    `json:"pageSize,omitempty"`
 }
 
 func (m OrdersQueryParams) Validate() error {
@@ -192,8 +193,9 @@ func (s service) Orders(params OrdersQueryParams, body OrdersQueryBody) (items [
 		shipout.NormalResponse
 		Data []OrdersRes `json:"data"`
 	}{}
+
 	resp, err := s.shipOut.Client.R().
-		SetQueryParams(map[string]string{"pageSize": "100", "curPageNo": "1"}).
+		SetQueryParamsFromValues(cast.StructToURLValues(params)).
 		SetBody(&body).
 		Get("/open-api/oms/order/queryList")
 	if err != nil {
@@ -201,14 +203,14 @@ func (s service) Orders(params OrdersQueryParams, body OrdersQueryBody) (items [
 	}
 
 	if resp.IsSuccess() {
-		if err = shipout.ErrorWrap(res.Result, res.Message); err == nil {
+		if err = shipout.ErrorWrap(res.ErrorCode, res.Message); err == nil {
 			if err = jsoniter.Unmarshal(resp.Body(), &res); err == nil {
 				items = res.Data
 			}
 		}
 	} else {
 		if e := jsoniter.Unmarshal(resp.Body(), &res); e == nil {
-			err = shipout.ErrorWrap(res.Result, res.Message)
+			err = shipout.ErrorWrap(res.ErrorCode, res.Message)
 		} else {
 			err = errors.New(resp.Status())
 		}

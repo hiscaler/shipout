@@ -82,11 +82,12 @@ func NewShipOut(config config.Config) *ShipOut {
 		OnAfterResponse(func(client *resty.Client, response *resty.Response) (err error) {
 			if response.IsSuccess() {
 				r := struct {
-					Result  string `json:"result"`
-					Message string `json:"message"`
+					Result    string `json:"result"`
+					ErrorCode string `json:"ErrorCode"`
+					Message   string `json:"message"`
 				}{}
 				if err = jsoniter.Unmarshal(response.Body(), &r); err == nil {
-					err = ErrorWrap(r.Result, r.Message)
+					err = ErrorWrap(r.ErrorCode, r.Message)
 				}
 			}
 			if err != nil {

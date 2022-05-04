@@ -17,7 +17,7 @@ type Warehouse struct {
 	WarehouseCity     string `json:"warehouseCity"`     // 仓库所在城市
 	WarehouseContacts string `json:"warehouseContacts"` // 仓库联系人
 	WarehouseCountry  string `json:"warehouseCountry"`  // 仓库所在国家
-	WarehouseEmail    string `json:"warehouseEmail"`    // 仓库联系Email
+	WarehouseEmail    string `json:"warehouseEmail"`    // 仓库联系 Email
 	WarehouseId       string `json:"warehouseId"`       // 仓库编号
 	WarehouseName     string `json:"warehouseName"`     // 仓库名称
 	WarehousePhone    string `json:"warehousePhone"`    // 仓库联系电话
@@ -54,14 +54,14 @@ func (s service) Warehouses(params WarehousesQueryParams) (items []Warehouse, is
 	}
 
 	if resp.IsSuccess() {
-		if err = shipout.ErrorWrap(res.Result, res.Message); err == nil {
+		if err = shipout.ErrorWrap(res.ErrorCode, res.Message); err == nil {
 			if err = jsoniter.Unmarshal(resp.Body(), &res); err == nil {
 				items = res.Data
 			}
 		}
 	} else {
 		if e := jsoniter.Unmarshal(resp.Body(), &res); e == nil {
-			err = shipout.ErrorWrap(res.Result, res.Message)
+			err = shipout.ErrorWrap(res.ErrorCode, res.Message)
 		} else {
 			err = errors.New(resp.Status())
 		}
