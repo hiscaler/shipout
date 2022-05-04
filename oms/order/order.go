@@ -152,16 +152,12 @@ type OrdersResRecord struct {
 	Status         int                       `json:"status"`         // 状态
 	ZipCode        string                    `json:"zipCode"`        // 邮编
 }
-type OrdersRes struct {
-	CountId          string `json:"countId"`
-	Current          int    `json:"current"`
-	HitCount         bool   `json:"hitCount"`
-	MaxLimit         int    `json:"maxLimit"`
-	OptimizeCountSQL bool   `json:"optimizeCountSql"`
-	Pages            int    `json:"pages"`
-	SearchCount      bool   `json:"searchCount"`
-	Size             int    `json:"size"`
-	Total            int    `json:"total"`
+
+type OrderRecord struct {
+	FulfillCharge float64 `json:"fulfillCharge"` // 总金额,完成计费后才会有
+	OrderDate     string  `json:"orderDate"`     // 订单日期
+	OrderId       string  `json:"orderId"`
+	OrderNO       string  `json:"orderNO"`
 }
 
 type OrdersQueryParams struct {
@@ -184,14 +180,25 @@ type OrdersQueryBody struct {
 	WarehouseId string `json:"warehouseId"`
 }
 
-func (s service) Orders(params OrdersQueryParams, body OrdersQueryBody) (items []OrdersRes, isLastPage bool, err error) {
+func (s service) Orders(params OrdersQueryParams, body OrdersQueryBody) (items []OrderRecord, isLastPage bool, err error) {
 	if err = params.Validate(); err != nil {
 		return
 	}
 
 	res := struct {
 		shipout.NormalResponse
-		Data []OrdersRes `json:"data"`
+		Data struct {
+			CountId          string        `json:"countId"`
+			Current          int           `json:"current"`
+			HitCount         bool          `json:"hitCount"`
+			MaxLimit         int           `json:"maxLimit"`
+			OptimizeCountSQL bool          `json:"optimizeCountSql"`
+			Pages            int           `json:"pages"`
+			Records          []OrderRecord `json:"records"`
+			IsSearchCount    bool          `json:"IsSearchCount"`
+			Size             string        `json:"size"`
+			Total            string        `json:"total"`
+		} `json:"data"`
 	}{}
 
 	resp, err := s.shipOut.Client.R().
@@ -205,7 +212,7 @@ func (s service) Orders(params OrdersQueryParams, body OrdersQueryBody) (items [
 	if resp.IsSuccess() {
 		if err = shipout.ErrorWrap(res.ErrorCode, res.Message); err == nil {
 			if err = jsoniter.Unmarshal(resp.Body(), &res); err == nil {
-				items = res.Data
+				items = res.Data.Records
 			}
 		}
 	} else {
@@ -268,7 +275,9 @@ func (s service) Order(params OrderQueryParams) (item Order, err error) {
 		Data Order `json:"data"`
 	}{}
 
-	resp, err := s.shipOut.Client.R().SetBody(params).Get("/open-api/oms/order/query")
+	resp, err := s.shipOut.Client.R().
+		SetQueryParamsFromValues(cast.StructToURLValues(params)).
+		Get("/open-api/oms/order/query")
 	if err != nil {
 		return
 	}

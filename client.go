@@ -7,6 +7,7 @@ import (
 	"github.com/hiscaler/gox/cryptox"
 	"github.com/hiscaler/shipout-go/config"
 	jsoniter "github.com/json-iterator/go"
+	"github.com/json-iterator/go/extra"
 	"log"
 	"os"
 	"sort"
@@ -19,6 +20,10 @@ import (
 const (
 	OK = 200 // 无错误
 )
+
+func init() {
+	extra.RegisterFuzzyDecoders()
+}
 
 var ErrNotFound = errors.New("shipout: not found")
 
@@ -87,7 +92,11 @@ func NewShipOut(config config.Config) *ShipOut {
 					Message   string `json:"message"`
 				}{}
 				if err = jsoniter.Unmarshal(response.Body(), &r); err == nil {
-					err = ErrorWrap(r.ErrorCode, r.Message)
+					code := r.ErrorCode
+					if code == "" {
+						code = r.Result
+					}
+					err = ErrorWrap(code, r.Message)
 				}
 			}
 			if err != nil {
@@ -117,7 +126,7 @@ type NormalResponse struct {
 
 // ErrorWrap 错误包装
 func ErrorWrap(code string, message string) error {
-	if code == "" {
+	if code == "" || code == "OK" {
 		return nil
 	}
 

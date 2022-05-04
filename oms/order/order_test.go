@@ -41,7 +41,7 @@ func TestOrders(t *testing.T) {
 	}
 	orders, _, err := soService.Orders(params, body)
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf(err.Error())
 	} else {
 		fmt.Println(fmt.Sprintf("%#v", orders))
 	}
@@ -51,7 +51,7 @@ func TestOrder(t *testing.T) {
 	params := OrderQueryParams{OrderId: "1"}
 	order, err := soService.Order(params)
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf(err.Error())
 	} else {
 		fmt.Println(fmt.Sprintf("%#v", order))
 	}
