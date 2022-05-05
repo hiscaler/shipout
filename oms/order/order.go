@@ -350,6 +350,7 @@ type Order struct {
 	Status         int             `json:"status"`         // 状态
 }
 
+// OrderQueryParams 订单查询参数
 type OrderQueryParams struct {
 	Name    string `json:"name,omitempty"`
 	OrderId string `json:"orderId"`
