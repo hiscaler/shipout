@@ -2,11 +2,14 @@ package order
 
 import (
 	"fmt"
+	"github.com/hiscaler/gox/jsonx"
 	"github.com/hiscaler/shipout-go"
 	"github.com/hiscaler/shipout-go/config"
+	"github.com/hiscaler/shipout-go/constant"
 	jsoniter "github.com/json-iterator/go"
 	"os"
 	"testing"
+	"time"
 )
 
 var soInstance *shipout.ShipOut
@@ -26,6 +29,49 @@ func TestMain(m *testing.M) {
 	soInstance = shipout.NewShipOut(c)
 	soService = NewService(soInstance)
 	m.Run()
+}
+
+func TestService_BatchSubmit(t *testing.T) {
+	req := BatchSubmitOrderRequest{
+		{
+			OrderNo: "001",
+			OrderSummary: OrderSummary{
+				OrderDate: time.Now().Format(constant.DatetimeFormat),
+			},
+			ShipmentForms: []ShipmentForm{
+				{
+					International: ShipmentFormInternational{
+						EEIType:   2,
+						EinOrSsn:  "123",
+						ITNNumber: "121212",
+					},
+					ProductList: []ShipmentFormProduct{
+						{
+							SKUId:    "111",
+							Quantity: 1,
+							Price:    1,
+						},
+					},
+					ShippingInfo: ShipmentFormShippingInfo{
+						ShipDate:      time.Now().Format(constant.DatetimeFormat),
+						ShipmentSid:   "1",
+						SignatureType: 2,
+					},
+				},
+			},
+			SID: int(time.Now().Unix()),
+			ToAddress: ToAddress{
+				ZipCode: "10010",
+			},
+			WarehouseId: "1",
+		},
+	}
+	results, err := soService.BatchSubmit(req)
+	if err != nil {
+		t.Errorf(err.Error())
+	} else {
+		fmt.Println(jsonx.ToPrettyJson(results))
+	}
 }
 
 func TestOrders(t *testing.T) {

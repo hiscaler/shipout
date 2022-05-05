@@ -3,12 +3,11 @@ module github.com/hiscaler/shipout-go
 go 1.17
 
 require (
+	github.com/deckarep/golang-set v1.8.0
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/hiscaler/gox v0.0.0-20220428024834-4cb6b61075f1
 	github.com/json-iterator/go v1.1.12
-	github.com/mitchellh/mapstructure v1.5.0
-	github.com/spf13/cast v1.4.1
 )
 
 require (
