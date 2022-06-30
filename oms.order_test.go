@@ -1,35 +1,12 @@
-package order
+package shipout
 
 import (
 	"fmt"
 	"github.com/hiscaler/gox/jsonx"
-	"github.com/hiscaler/shipout-go"
-	"github.com/hiscaler/shipout-go/config"
 	"github.com/hiscaler/shipout-go/constant"
-	jsoniter "github.com/json-iterator/go"
-	"os"
 	"testing"
 	"time"
 )
-
-var soInstance *shipout.ShipOut
-var soService Service
-
-func TestMain(m *testing.M) {
-	b, err := os.ReadFile("../../config/config_test.json")
-	if err != nil {
-		panic(fmt.Sprintf("Read config error: %s", err.Error()))
-	}
-	var c config.Config
-	err = jsoniter.Unmarshal(b, &c)
-	if err != nil {
-		panic(fmt.Sprintf("Parse config file error: %s", err.Error()))
-	}
-
-	soInstance = shipout.NewShipOut(c)
-	soService = NewService(soInstance)
-	m.Run()
-}
 
 func TestService_BatchSubmit(t *testing.T) {
 	req := BatchSubmitOrderRequest{
@@ -66,7 +43,7 @@ func TestService_BatchSubmit(t *testing.T) {
 			WarehouseId: "1",
 		},
 	}
-	results, err := soService.BatchSubmit(req)
+	results, err := shipOutClient.OMS.Order.BatchSubmit(req)
 	if err != nil {
 		t.Errorf(err.Error())
 	} else {
@@ -85,7 +62,7 @@ func TestOrders(t *testing.T) {
 		Status:      9,
 		WarehouseId: "",
 	}
-	orders, _, err := soService.Orders(params, body)
+	orders, _, err := shipOutClient.OMS.Order.Orders(params, body)
 	if err != nil {
 		t.Errorf(err.Error())
 	} else {
@@ -94,8 +71,8 @@ func TestOrders(t *testing.T) {
 }
 
 func TestOrder(t *testing.T) {
-	params := OrderQueryParams{OrderId: "1"}
-	order, err := soService.Order(params)
+	params := OrderQueryParams{OrderId: "1522028289232097282"}
+	order, err := shipOutClient.OMS.Order.Order(params)
 	if err != nil {
 		t.Errorf(err.Error())
 	} else {

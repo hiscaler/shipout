@@ -122,6 +122,7 @@ func NewShipOut(config config.Config) *ShipOut {
 	}
 	shipOutClient.OMS = omsServices{
 		BaseInfo: (baseInfoService)(xService),
+		Order:    (orderService)(xService),
 	}
 	return shipOutClient
 }

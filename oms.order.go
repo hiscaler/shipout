@@ -1,18 +1,17 @@
-package order
+package shipout
 
 import (
 	"context"
 	"errors"
 	mapset "github.com/deckarep/golang-set"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
-	"github.com/hiscaler/shipout-go"
 	"github.com/hiscaler/shipout-go/constant"
-	"github.com/hiscaler/shipout-go/pkg/cast"
 	jsoniter "github.com/json-iterator/go"
 )
 
 // 订单
 // https://open.shipout.com/portal/zh/api/order.html
+type orderService service
 
 type BatchSubmitResult struct {
 	OrderId       string   `json:"order_id"`
@@ -191,17 +190,17 @@ func (m BatchSubmitOrderRequest) Validate() error {
 	)
 }
 
-func (s service) BatchSubmit(req BatchSubmitOrderRequest) (items []BatchSubmitResult, err error) {
+func (s orderService) BatchSubmit(req BatchSubmitOrderRequest) (items []BatchSubmitResult, err error) {
 	if err = req.Validate(); err != nil {
 		return
 	}
 
 	res := struct {
-		shipout.NormalResponse
+		NormalResponse
 		Data []BatchSubmitResult `json:"data"`
 	}{}
 
-	resp, err := s.shipOut.Client.R().
+	resp, err := s.httpClient.R().
 		SetBody(req).
 		Post("/open-api/oms/order/batchSubmit")
 	if err != nil {
@@ -209,12 +208,12 @@ func (s service) BatchSubmit(req BatchSubmitOrderRequest) (items []BatchSubmitRe
 	}
 
 	if resp.IsSuccess() {
-		if err = shipout.ErrorWrap(res.ErrorCode, res.Message); err == nil {
+		if err = ErrorWrap(res.ErrorCode, res.Message); err == nil {
 			items = res.Data
 		}
 	} else {
 		if e := jsoniter.Unmarshal(resp.Body(), &res); e == nil {
-			err = shipout.ErrorWrap(res.ErrorCode, res.Message)
+			err = ErrorWrap(res.ErrorCode, res.Message)
 		} else {
 			err = errors.New(resp.Status())
 		}
@@ -257,12 +256,12 @@ type OrderRecord struct {
 }
 
 type OrdersQueryParams struct {
-	Asc         bool   `json:"asc,omitempty"`
-	CurPageNo   int    `json:"curPageNo,omitempty"`
-	HiDirection string `json:"hiDirection,omitempty"`
-	Name        string `json:"name,omitempty"`
-	OrderColumn string `json:"orderColumn,omitempty"`
-	PageSize    int    `json:"pageSize,omitempty"`
+	Asc         bool   `url:"asc,omitempty"`
+	CurPageNo   int    `url:"curPageNo,omitempty"`
+	HiDirection string `url:"hiDirection,omitempty"`
+	Name        string `url:"name,omitempty"`
+	OrderColumn string `url:"orderColumn,omitempty"`
+	PageSize    int    `url:"pageSize,omitempty"`
 }
 
 func (m OrdersQueryParams) Validate() error {
@@ -276,13 +275,13 @@ type OrdersQueryBody struct {
 	WarehouseId string `json:"warehouseId"`
 }
 
-func (s service) Orders(params OrdersQueryParams, body OrdersQueryBody) (items []OrderRecord, isLastPage bool, err error) {
+func (s orderService) Orders(params OrdersQueryParams, body OrdersQueryBody) (items []OrderRecord, isLastPage bool, err error) {
 	if err = params.Validate(); err != nil {
 		return
 	}
 
 	res := struct {
-		shipout.NormalResponse
+		NormalResponse
 		Data struct {
 			CountId          string        `json:"countId"`
 			Current          int           `json:"current"`
@@ -297,8 +296,8 @@ func (s service) Orders(params OrdersQueryParams, body OrdersQueryBody) (items [
 		} `json:"data"`
 	}{}
 
-	resp, err := s.shipOut.Client.R().
-		SetQueryParamsFromValues(cast.StructToURLValues(params)).
+	resp, err := s.httpClient.R().
+		SetQueryParamsFromValues(toValues(params)).
 		SetBody(&body).
 		Get("/open-api/oms/order/queryList")
 	if err != nil {
@@ -306,14 +305,14 @@ func (s service) Orders(params OrdersQueryParams, body OrdersQueryBody) (items [
 	}
 
 	if resp.IsSuccess() {
-		if err = shipout.ErrorWrap(res.ErrorCode, res.Message); err == nil {
+		if err = ErrorWrap(res.ErrorCode, res.Message); err == nil {
 			if err = jsoniter.Unmarshal(resp.Body(), &res); err == nil {
 				items = res.Data.Records
 			}
 		}
 	} else {
 		if e := jsoniter.Unmarshal(resp.Body(), &res); e == nil {
-			err = shipout.ErrorWrap(res.ErrorCode, res.Message)
+			err = ErrorWrap(res.ErrorCode, res.Message)
 		} else {
 			err = errors.New(resp.Status())
 		}
@@ -352,8 +351,8 @@ type Order struct {
 
 // OrderQueryParams 订单查询参数
 type OrderQueryParams struct {
-	Name    string `json:"name,omitempty"`
-	OrderId string `json:"orderId"`
+	Name    string `url:"name,omitempty"`
+	OrderId string `url:"orderId"`
 }
 
 func (m OrderQueryParams) Validate() error {
@@ -362,30 +361,30 @@ func (m OrderQueryParams) Validate() error {
 	)
 }
 
-func (s service) Order(params OrderQueryParams) (item Order, err error) {
+func (s orderService) Order(params OrderQueryParams) (item Order, err error) {
 	if err = params.Validate(); err != nil {
 		return
 	}
 
 	res := struct {
-		shipout.NormalResponse
+		NormalResponse
 		Data Order `json:"data"`
 	}{}
 
-	resp, err := s.shipOut.Client.R().
-		SetQueryParamsFromValues(cast.StructToURLValues(params)).
+	resp, err := s.httpClient.R().
+		SetQueryParamsFromValues(toValues(params)).
 		Get("/open-api/oms/order/query")
 	if err != nil {
 		return
 	}
 
 	if resp.IsSuccess() {
-		if err = shipout.ErrorWrap(res.ErrorCode, res.Message); err == nil {
+		if err = ErrorWrap(res.ErrorCode, res.Message); err == nil {
 			item = res.Data
 		}
 	} else {
 		if e := jsoniter.Unmarshal(resp.Body(), &res); e == nil {
-			err = shipout.ErrorWrap(res.ErrorCode, res.Message)
+			err = ErrorWrap(res.ErrorCode, res.Message)
 		} else {
 			err = errors.New(resp.Status())
 		}
