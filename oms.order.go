@@ -348,8 +348,10 @@ type Order struct {
 
 // OrderQueryParams 订单查询参数
 type OrderQueryParams struct {
-	Name    string `url:"name,omitempty"`
-	OrderId string `url:"orderId"`
+	Name        string `url:"name,omitempty"`
+	OrderId     string `url:"orderId,omitempty"`     // 订单id
+	OutboundNO  string `url:"outboundNO,omitempty"`  // 出库单号
+	WarehouseId string `url:"warehouseId,omitempty"` // 仓库 id
 }
 
 func (m OrderQueryParams) Validate() error {
