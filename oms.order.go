@@ -6,6 +6,7 @@ import (
 	mapset "github.com/deckarep/golang-set"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/hiscaler/shipout-go/constant"
+	"github.com/hiscaler/shipout-go/entity"
 	jsoniter "github.com/json-iterator/go"
 )
 
@@ -21,9 +22,10 @@ type BatchSubmitResult struct {
 
 // OrderSummary 订单摘要
 type OrderSummary struct {
-	Age        int    `json:"age,omitempty"`
-	CreateTime string `json:"createTime,omitempty"`
-	OrderDate  string `json:"orderDate"` // 订单创建时间,格式:yyyy-MM-dd HH:mm:ss
+	Age           int    `json:"age,omitempty"`
+	CreateTime    string `json:"createTime,omitempty"`
+	NoteFromBuyer string `json:"note_from_buyer,omitempty"`
+	OrderDate     string `json:"orderDate"` // 订单创建时间,格式:yyyy-MM-dd HH:mm:ss
 }
 
 func (m OrderSummary) Validate() error {
@@ -319,33 +321,6 @@ func (s orderService) All(params OrdersQueryParams) (items []OrderRecord, isLast
 
 // 单个订单查询
 
-// OrderRecipient 收货人信息
-type OrderRecipient struct {
-	AddressLine1 string `json:"addressLine1"` // 收件人地址行1
-	AddressLine2 string `json:"addressLine2"` // 收件人地址行2
-	City         string `json:"city"`         // 城市
-	Company      string `json:"company"`      // 收件人公司
-	CountryCode  string `json:"countryCode"`  // 国家编码，格式标准遵循ISO 3166-1 alpha-2
-	Email        string `json:"email"`        // 收件人邮箱
-	Name         string `json:"name"`         // 收件人姓名
-	Phone        string `json:"phone"`        // 收件人联系电话
-	Residential  bool   `json:"residential"`  //
-	StateCode    string `json:"stateCode"`    // 州代码，美国为两位大写，如CA、NY
-	ZipCode      string `json:"zipCode"`      // 邮政编码
-}
-
-// OrderShipment 发货信息
-type OrderShipment struct {
-}
-
-type Order struct {
-	OrderId        string          `json:"orderId"`        // 订单 ID
-	OrderRecipient OrderRecipient  `json:"orderRecipient"` // 收货人信息
-	OrderShipments []OrderShipment `json:"orderShipments"` // 发货列表
-	OrderSummary   []OrderSummary  `json:"orderSummary"`   // 订单摘要
-	Status         int             `json:"status"`         // 状态
-}
-
 // OrderQueryParams 订单查询参数
 type OrderQueryParams struct {
 	Name        string `url:"name,omitempty"`
@@ -360,14 +335,14 @@ func (m OrderQueryParams) Validate() error {
 	)
 }
 
-func (s orderService) One(params OrderQueryParams) (item Order, err error) {
+func (s orderService) One(params OrderQueryParams) (item entity.Order, err error) {
 	if err = params.Validate(); err != nil {
 		return
 	}
 
 	res := struct {
 		NormalResponse
-		Data Order `json:"data"`
+		Data entity.Order `json:"data"`
 	}{}
 	resp, err := s.httpClient.R().
 		SetQueryParamsFromValues(toValues(params)).
@@ -377,15 +352,13 @@ func (s orderService) One(params OrderQueryParams) (item Order, err error) {
 	}
 
 	if resp.IsSuccess() {
-		if err = ErrorWrap(res.ErrorCode, res.Message); err == nil {
-			item = res.Data
+		if err = jsoniter.Unmarshal(resp.Body(), &res); err == nil {
+			if err = ErrorWrap(res.ErrorCode, res.Message); err == nil {
+				item = res.Data
+			}
 		}
 	} else {
-		if e := jsoniter.Unmarshal(resp.Body(), &res); e == nil {
-			err = ErrorWrap(res.ErrorCode, res.Message)
-		} else {
-			err = errors.New(resp.Status())
-		}
+		err = errors.New(resp.Status())
 	}
 	return
 }

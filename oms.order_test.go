@@ -65,7 +65,7 @@ func TestOrders(t *testing.T) {
 }
 
 func TestOrder(t *testing.T) {
-	params := OrderQueryParams{OrderId: "1522028289232097282"}
+	params := OrderQueryParams{OrderId: "1521695670086434817"}
 	order, err := shipOutClient.OMS.Order.One(params)
 	if err != nil {
 		t.Errorf(err.Error())
