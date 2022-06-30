@@ -261,6 +261,11 @@ type OrdersQueryParams struct {
 	HiDirection string `url:"hiDirection,omitempty"`
 	Name        string `url:"name,omitempty"`
 	OrderColumn string `url:"orderColumn,omitempty"`
+	OrderNo     string `url:"orderNO,omitempty"`
+	OrgId       string `url:"orgId,omitempty"`
+	ServerOrgId string `url:"serverOrgId,omitempty"`
+	Status      int    `url:"status,omitempty"` // 1.Awaiting Payment 2.Awaiting Fulillment 3.Being Fulilled 4.Shipped 5.Delievered 6.Cancelled 7.RMA Initiated 8.RMA Processing 9.RMA Completed
+	WarehouseId string `url:"warehouseId,omitempty"`
 	PageSize    int    `url:"pageSize,omitempty"`
 }
 
@@ -268,14 +273,7 @@ func (m OrdersQueryParams) Validate() error {
 	return nil
 }
 
-type OrdersQueryBody struct {
-	OrgId       string `json:"orgId"`
-	ServerOrgId string `json:"serverOrgId"`
-	Status      int    `json:"status"`
-	WarehouseId string `json:"warehouseId"`
-}
-
-func (s orderService) Orders(params OrdersQueryParams, body OrdersQueryBody) (items []OrderRecord, isLastPage bool, err error) {
+func (s orderService) All(params OrdersQueryParams) (items []OrderRecord, isLastPage bool, err error) {
 	if err = params.Validate(); err != nil {
 		return
 	}
@@ -298,8 +296,7 @@ func (s orderService) Orders(params OrdersQueryParams, body OrdersQueryBody) (it
 
 	resp, err := s.httpClient.R().
 		SetQueryParamsFromValues(toValues(params)).
-		SetBody(&body).
-		Get("/open-api/oms/order/queryList")
+		Get("/open-api/oms/order/queryListV2")
 	if err != nil {
 		return
 	}
@@ -361,7 +358,7 @@ func (m OrderQueryParams) Validate() error {
 	)
 }
 
-func (s orderService) Order(params OrderQueryParams) (item Order, err error) {
+func (s orderService) One(params OrderQueryParams) (item Order, err error) {
 	if err = params.Validate(); err != nil {
 		return
 	}
@@ -370,7 +367,6 @@ func (s orderService) Order(params OrderQueryParams) (item Order, err error) {
 		NormalResponse
 		Data Order `json:"data"`
 	}{}
-
 	resp, err := s.httpClient.R().
 		SetQueryParamsFromValues(toValues(params)).
 		Get("/open-api/oms/order/query")

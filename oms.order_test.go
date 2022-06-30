@@ -56,13 +56,7 @@ func TestOrders(t *testing.T) {
 		CurPageNo: 1,
 		PageSize:  100,
 	}
-	body := OrdersQueryBody{
-		OrgId:       "",
-		ServerOrgId: "",
-		Status:      9,
-		WarehouseId: "",
-	}
-	orders, _, err := shipOutClient.OMS.Order.Orders(params, body)
+	orders, _, err := shipOutClient.OMS.Order.All(params)
 	if err != nil {
 		t.Errorf(err.Error())
 	} else {
@@ -72,7 +66,7 @@ func TestOrders(t *testing.T) {
 
 func TestOrder(t *testing.T) {
 	params := OrderQueryParams{OrderId: "1522028289232097282"}
-	order, err := shipOutClient.OMS.Order.Order(params)
+	order, err := shipOutClient.OMS.Order.One(params)
 	if err != nil {
 		t.Errorf(err.Error())
 	} else {
