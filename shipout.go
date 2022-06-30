@@ -4,11 +4,13 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-resty/resty/v2"
+	"github.com/google/go-querystring/query"
 	"github.com/hiscaler/gox/cryptox"
 	"github.com/hiscaler/shipout-go/config"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/json-iterator/go/extra"
 	"log"
+	"net/url"
 	"os"
 	"sort"
 	"strconv"
@@ -17,6 +19,7 @@ import (
 )
 
 // 返回代码
+
 const (
 	OK = 200 // 无错误
 )
@@ -38,11 +41,12 @@ type ShipOut struct {
 	Logger             *log.Logger        // 日志
 	EnableCache        bool               // 是否激活缓存
 	QueryDefaultValues queryDefaultValues // 查询默认值
+	OMS                omsServices        // OMS API Services
 }
 
 func NewShipOut(config config.Config) *ShipOut {
 	logger := log.New(os.Stdout, "[ ShipOut ] ", log.LstdFlags|log.Llongfile)
-	soInstance := &ShipOut{
+	shipOutClient := &ShipOut{
 		Debug:  config.Debug,
 		Logger: logger,
 		QueryDefaultValues: queryDefaultValues{
@@ -50,7 +54,7 @@ func NewShipOut(config config.Config) *ShipOut {
 			PageSize: 100,
 		},
 	}
-	client := resty.New().
+	httpClient := resty.New().
 		SetDebug(config.Debug).
 		SetBaseURL("https://open.shipout.com/api/").
 		SetHeaders(map[string]string{
@@ -105,13 +109,21 @@ func NewShipOut(config config.Config) *ShipOut {
 			return
 		})
 	if config.Debug {
-		client.SetBaseURL("https://opendev.shipout.com/api/")
-		client.EnableTrace()
+		httpClient.SetBaseURL("https://opendev.shipout.com/api/")
+		httpClient.EnableTrace()
 	}
-	client.JSONMarshal = jsoniter.Marshal
-	client.JSONUnmarshal = jsoniter.Unmarshal
-	soInstance.Client = client
-	return soInstance
+	httpClient.JSONMarshal = jsoniter.Marshal
+	httpClient.JSONUnmarshal = jsoniter.Unmarshal
+	shipOutClient.Client = httpClient
+	xService := service{
+		debug:      config.Debug,
+		logger:     logger,
+		httpClient: httpClient,
+	}
+	shipOutClient.OMS = omsServices{
+		BaseInfo: (baseInfoService)(xService),
+	}
+	return shipOutClient
 }
 
 // NormalResponse Normal API response
@@ -134,4 +146,10 @@ func ErrorWrap(code string, message string) error {
 	if message == "" {
 	}
 	return fmt.Errorf("%s: %s", code, message)
+}
+
+// change to url.values
+func toValues(i interface{}) (values url.Values) {
+	values, _ = query.Values(i)
+	return
 }
