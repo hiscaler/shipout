@@ -104,17 +104,17 @@ func (m BulkShipmentFormOutboundInfo) Validate() error {
 
 // BulkShipmentFormProduct 发货单产品列表
 type BulkShipmentFormProduct struct {
-	OmsSKU   string  `json:"omsSku"`          // 产品 SKU (skuId和omsSku至少传一个)
+	OmsSku   string  `json:"omsSku"`          // 产品 SKU (skuId和omsSku至少传一个)
 	Price    float64 `json:"price,omitempty"` // 单价
 	Quantity int     `json:"qty"`             // 数量
-	SKUId    string  `json:"skuId"`           // 系统产品主键
+	SkuId    string  `json:"skuId"`           // 系统产品主键
 }
 
 func (m BulkShipmentFormProduct) Validate() error {
 	return validation.ValidateStruct(&m,
 		validation.Field(&m.Quantity, validation.Min(1).Error("数量不能小于 {{.threshold}}")),
-		validation.Field(&m.OmsSKU, validation.When(m.SKUId == "", validation.Required.Error("产品 SKU/系统产品主键必传其一"))),
-		validation.Field(&m.SKUId, validation.When(m.OmsSKU == "", validation.Required.Error("系统产品主键/产品 SKU 必传其一"))),
+		validation.Field(&m.OmsSku, validation.When(m.SkuId == "", validation.Required.Error("产品 SKU/系统产品主键必传其一"))),
+		validation.Field(&m.SkuId, validation.When(m.OmsSku == "", validation.Required.Error("系统产品主键/产品 SKU 必传其一"))),
 	)
 }
 
@@ -235,7 +235,7 @@ func (m BulkOrderRequests) Validate() error {
 											return errors.New("无效的发货单商品")
 										}
 										return validation.ValidateStruct(&product,
-											validation.Field(&product.SKUId, validation.Required.Error("系统产品主键不能为空")),
+											validation.Field(&product.SkuId, validation.Required.Error("系统产品主键不能为空")),
 											validation.Field(&product.Quantity, validation.Min(1).Error("商品数量不能少于 {{.threshold}}")),
 											validation.Field(&product.Price, validation.Min(0.0).Error("商品价格不能小于 {{.threshold}}")),
 										)

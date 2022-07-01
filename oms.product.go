@@ -16,7 +16,7 @@ type productService service
 
 // UpdateProductRequest 商品更新请求
 type UpdateProductRequest struct {
-	Aliases             []entity.SKUAlias     `json:"aliases"`             // 店铺SKU对照，只支持覆盖式的更新
+	Aliases             []entity.SkuAlias     `json:"aliases"`             // 店铺SKU对照，只支持覆盖式的更新
 	Asin                string                `json:"asin"`                // ASIN码
 	BatteryFlag         bool                  `json:"batteryFlag"`         // 是否包含电池
 	BatteryType         string                `json:"batteryType"`         // 电池类型，含电池时必传

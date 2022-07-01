@@ -1,9 +1,9 @@
 package entity
 
-type ProductRecordSKUAlias struct {
-	OmsSKU  string `json:"omsSku"`  // 系统SKU
-	SKU     string `json:"sku"`     // 店铺SKU
-	StoreId string `json:"storeId"` // 店铺Id
+type ProductRecordSkuAlias struct {
+	OmsSku  string `json:"omsSku"`  // 系统 SKU
+	sku     string `json:"sku"`     // 店铺 SKU
+	StoreId string `json:"storeId"` // 店铺 Id
 }
 
 // ProductRecordBundleDetail 组合详情
@@ -15,7 +15,7 @@ type ProductRecordBundleDetail struct {
 }
 
 type ProductRecordWmsAllStatus struct {
-	SKUId     string `json:"skuId"`
+	SkuId     string `json:"skuId"`
 	AllStatus int    `json:"allStatus"` // 审核状态：1-Approval Pending，2-Approved，3-Rejected，4-Partial Approved，5-Partial Rejected
 }
 
@@ -59,7 +59,7 @@ type ProductRecordWmsHistory struct {
 
 // ProductRecordWmsSku 仓库
 type ProductRecordWmsSku struct {
-	Aliases               []SKUAlias                     `json:"aliases"`
+	Aliases               []SkuAlias                     `json:"aliases"`
 	AllStatus             []ProductRecordWmsAllStatus    `json:"allStatus"`
 	Asin                  string                         `json:"asin"`
 	AuditRemark           string                         `json:"auditRemark"`
@@ -145,7 +145,7 @@ type ProductRecordWmsSku struct {
 
 type ProductRecord struct {
 	ASIN                string                      `json:"asin"`                // ASIN 码
-	Aliases             []ProductRecordSKUAlias     `json:"aliases"`             // 店铺别名详情
+	Aliases             []ProductRecordSkuAlias     `json:"aliases"`             // 店铺别名详情
 	AuditRemark         string                      `json:"auditRemark"`         // 审核备注
 	BatteryFlag         bool                        `json:"batteryFlag"`         // 是否含电池
 	BatteryType         string                      `json:"batteryType"`         // 电池类型，含电池时必传. 1.Lithium Ion-Cells or batteries ONLY;2.Lithium Ion-Packed with Equipment;3.Lithium Ion-Contained in Equipment4.Lithium Metal-Cells or batteries ONLY5.Lithium Metal-Packed with Equipment6.Lithium Metal-Contained in Equipment

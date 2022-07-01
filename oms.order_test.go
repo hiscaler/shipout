@@ -24,7 +24,7 @@ func TestService_Bulk(t *testing.T) {
 					},
 					ProductList: []BulkShipmentFormProduct{
 						{
-							SKUId:    "1521695517976563714",
+							SkuId:    "1521695517976563714",
 							Quantity: 1,
 							Price:    1,
 						},

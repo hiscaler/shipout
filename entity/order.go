@@ -53,10 +53,10 @@ type OrderShipmentPackage struct {
 }
 
 type OrderShipmentProduct struct {
-	OmsSKU   string  `json:"omsSku"` // 产品的sku(skuId和omsSku至少传一个)
+	OmsSku   string  `json:"omsSku"` // 产品的sku(skuId和omsSku至少传一个)
 	Price    float64 `json:"price"`  // 单价
 	Quantity int     `json:"qty"`    // 数量（大于0）
-	SKUId    string  `json:"skuId"`  // 系统产品主键(skuId和omsSku至少传一个)
+	SkuId    string  `json:"skuId"`  // 系统产品主键(skuId和omsSku至少传一个)
 }
 
 // OrderShipment 发货信息
