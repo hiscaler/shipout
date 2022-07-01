@@ -8,42 +8,56 @@ import (
 	"time"
 )
 
-func TestService_BatchSubmit(t *testing.T) {
-	req := BatchSubmitOrderRequest{
+func TestService_Bulk(t *testing.T) {
+	req := BulkOrderRequests{
 		{
 			OrderNo: "001",
-			OrderSummary: OrderSummary{
+			OrderSummary: BulkOrderSummary{
 				OrderDate: time.Now().Format(constant.DatetimeFormat),
 			},
-			ShipmentForms: []ShipmentForm{
+			ShipmentForms: []BulkShipmentForm{
 				{
-					International: ShipmentFormInternational{
+					International: BulkShipmentFormInternational{
 						EEIType:   2,
 						EinOrSsn:  "123",
 						ITNNumber: "121212",
 					},
-					ProductList: []ShipmentFormProduct{
+					ProductList: []BulkShipmentFormProduct{
 						{
-							SKUId:    "111",
+							SKUId:    "sku001",
 							Quantity: 1,
 							Price:    1,
 						},
 					},
-					ShippingInfo: ShipmentFormShippingInfo{
+					OutboundInfo: BulkShipmentFormOutboundInfo{
+						SysServiceId:   "6",
+						TrackingNumber: "SF001",
+						ShipmentOutboundLabel: BulkShipmentFormOutboundLabel{
+							LabelURL: "https://www.a.com/sf001.pdf",
+						},
+					},
+					ShippingInfo: BulkShipmentFormShippingInfo{
 						ShipDate:      time.Now().Format(constant.DatetimeFormat),
 						ShipmentSid:   "1",
+						CarrierId:     1,
 						SignatureType: 2,
 					},
 				},
 			},
 			SID: int(time.Now().Unix()),
-			ToAddress: ToAddress{
-				ZipCode: "10010",
+			ToAddress: BulkToAddress{
+				Name:         "Haroutun Karadjian",
+				AddressLine1: "3384 Route 14 Rum Creek Road Stollings WV US",
+				CountryCode:  "US",
+				City:         "Stollings",
+				StateCode:    "WV",
+				ZipCode:      "25646",
+				Phone:        "+1 123-456-7890 ext. 62214",
 			},
 			WarehouseId: "1",
 		},
 	}
-	results, err := shipOutClient.OMS.Order.BatchSubmit(req)
+	results, err := shipOutClient.OMS.Order.Bulk(req)
 	if err != nil {
 		t.Errorf(err.Error())
 	} else {

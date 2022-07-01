@@ -40,10 +40,10 @@ fmt.Println(orders)
 shipOutClient.OMS.Order.Xyz()
 ```
 
+- Bulk() 批量提交订单
 - All() 查询订单列表
 - One() 查询单个订单
 - Cancel() 取消订单
-- BatchSubmit() 批量提交订单
 
 ## 基础信息
 

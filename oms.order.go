@@ -5,6 +5,7 @@ import (
 	"errors"
 	mapset "github.com/deckarep/golang-set"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/go-ozzo/ozzo-validation/v4/is"
 	"github.com/hiscaler/shipout-go/constant"
 	"github.com/hiscaler/shipout-go/entity"
 	jsoniter "github.com/json-iterator/go"
@@ -14,21 +15,43 @@ import (
 // https://open.shipout.com/portal/zh/api/order.html
 type orderService service
 
-type BatchSubmitResult struct {
-	OrderId       string   `json:"order_id"`
-	OrderNo       string   `json:"orderNo"`
-	FulfillResult []string `json:"fulfillResult"`
+// 批量订单提交
+
+// BulkOrderResult 批量订单提交返回结果
+type BulkOrderResult struct {
+	OrderId       string   `json:"order_id"`      // 订单Id
+	OrderNo       string   `json:"orderNo"`       // 订单号
+	FulfillResult []string `json:"fulfillResult"` // 订单摘要
 }
 
-// OrderSummary 订单摘要
-type OrderSummary struct {
+// BulkOrderResultFulfill 订单摘要
+type BulkOrderResultFulfill struct {
+	CarrierCode            string   `json:"carrierCode"`            // 物流商
+	CreateLabelErrorMsg    string   `json:"createLabelErrorMsg"`    // 创建Label错误信息
+	CreateOutboundErrorMsg string   `json:"createOutboundErrorMsg"` // 创建出库单错误信息
+	FeeDetail              string   `json:"feeDetail"`              // 费用详情
+	FulfillSuccess         bool     `json:"fulfillSuccess"`         // fulfill成功(用这个字段判断出库单创建成功)
+	InterDepositRate       float64  `json:"interDepositRate"`       // 国际单押金
+	OriginFee              float64  `json:"originFee"`              // 原始费用
+	OriginFeeDetail        string   `json:"originFeeDetail"`        // 原始费用详情
+	OutboundId             string   `json:"outboundId"`             // outboundId
+	OutboundNumber         string   `json:"outboundNumber"`         // outboundNumber
+	Rate                   float64  `json:"rate"`                   // 费用
+	ShipmentId             string   `json:"shipmentId"`             // shipmentId
+	ShipmentNO             string   `json:"shipmentNO"`             // shipmentNO
+	TrackingNumber         []string `json:"trackingNumber"`         // 物流跟踪号
+	WarehouseId            string   `json:"warehouseId"`            // 仓库
+}
+
+// BulkOrderSummary 订单摘要
+type BulkOrderSummary struct {
 	Age           int    `json:"age,omitempty"`
 	CreateTime    string `json:"createTime,omitempty"`
-	NoteFromBuyer string `json:"note_from_buyer,omitempty"`
-	OrderDate     string `json:"orderDate"` // 订单创建时间,格式:yyyy-MM-dd HH:mm:ss
+	NoteFromBuyer string `json:"note_from_buyer,omitempty"` // 顾客备注
+	OrderDate     string `json:"orderDate"`                 // 订单创建时间,格式:yyyy-MM-dd HH:mm:ss
 }
 
-func (m OrderSummary) Validate() error {
+func (m BulkOrderSummary) Validate() error {
 	return validation.ValidateStruct(&m,
 		validation.Field(&m.OrderDate,
 			validation.Required.Error("订单创建时间不能为空"),
@@ -37,61 +60,78 @@ func (m OrderSummary) Validate() error {
 	)
 }
 
-// ShipmentFormInternational 发货单国际单补充
-type ShipmentFormInternational struct {
+// BulkShipmentFormInternational 发货单国际单补充
+type BulkShipmentFormInternational struct {
 	EEIType                int    `json:"eeiType"`                          // EEI类型 1.需要豁免 2.已有ITN Number; 一般总申报金额低于2500时需要豁免
 	EinOrSsn               string `json:"einOrSsn"`                         // 找仓库要的ein码，在美国发国外用的一个雇主识别码，不发国外的话不需要
 	ForeignTradeRegulation string `json:"foreignTradeRegulation,omitempty"` // FTR码, 如果是去往非加拿大国家的货物,没有超过2500时豁免码为30.37(a); 如果是去往加拿大,没有超过2500时豁免码为30.36
 	ITNNumber              string `json:"itnNumber,omitempty"`              // ITN Number，EEI类型为已有ITN Number时必传
 }
 
-// ShipmentOutboundLabel label 信息
-type ShipmentOutboundLabel struct {
-	LabelURL []string `json:"labelUrl"` // 运单url地址
+// BulkShipmentFormOutboundLabel label 信息
+type BulkShipmentFormOutboundLabel struct {
+	LabelURL string `json:"labelUrl"` // 运单 URL 地址
 }
 
-// ShipmentFormOutboundInfo 出库单信息
-type ShipmentFormOutboundInfo struct {
-	AdditionService       []string                `json:"additionService"`       // 附加服务
-	Remark                string                  `json:"remark"`                // 备注
-	ShipmentOutboundLabel []ShipmentOutboundLabel `json:"shipmentOutboundLabel"` // label 信息
-	SysServiceId          string                  `json:"sysServiceId"`          // 运输类型 6.客户自己上传物流单号和运单地址 7.不需要打单（客户去仓库自提） 9.使用仓库选择的服务,即要打物流单
-	TrackingNumber        string                  `json:"trackingNumber"`        // 物流跟踪号
-}
-
-// ShipmentFormProduct 发货单产品列表
-type ShipmentFormProduct struct {
-	Price    float64 `json:"price"` // 单价
-	Quantity int     `json:"qty"`   // 数量
-	SKUId    string  `json:"skuId"` // 系统产品主键
-}
-
-// ShipmentFormShippingInfo 发货单基本信息
-type ShipmentFormShippingInfo struct {
-	CarrierId     int    `json:"carrierId,omitempty"` // 运输商: 1. USPS 2. UPS 3. FedEx 4. DHL 9. Other
-	ShipDate      string `json:"shipDate"`            // 计划执运日期，即计划发货日期，格式：“yyyy-MM-dd 00:00:00”
-	ShipmentSid   string `json:"shipmentSid"`         // shipment序号
-	SignatureType int    `json:"signatureType"`       // 签名类型：1.Indirect (FedEx,UPS only) 2.DIRECT 3.ADULT 4.SERVICE_DEFAULT(default)
-}
-
-// ShipmentForm 执运信息，即发货表单
-type ShipmentForm struct {
-	International ShipmentFormInternational `json:"international"` // 发货单国际单补充
-	OutboundInfo  ShipmentFormOutboundInfo  `json:"outboundInfo"`  // 出库单信息
-	ProductList   []ShipmentFormProduct     `json:"productList"`   // 发货单产品列表
-	ShippingInfo  ShipmentFormShippingInfo  `json:"shippingInfo"`  // 发货单基本信息
-}
-
-func (m ShipmentFormInternational) Validate() error {
+func (m BulkShipmentFormOutboundLabel) Validate() error {
 	return validation.ValidateStruct(&m,
-		validation.Field(&m.EEIType, validation.In(1, 2).Error("无效的 EFI 类型")),
-		validation.Field(&m.EinOrSsn, validation.Required.Error("EIN 码不能为空")),
-		validation.Field(&m.ForeignTradeRegulation, validation.When(m.EEIType == 1, validation.Required.Error("FTR 码不能为空"))),
-		validation.Field(&m.ITNNumber, validation.When(m.EEIType == 2, validation.Required.Error("ITN 不能为空"))),
+		validation.Field(&m.LabelURL,
+			validation.Required.Error("运单 URL 地址不能为空"),
+			is.URL.Error("无效的运单 URL 地址"),
+		),
 	)
 }
-func (m ShipmentFormShippingInfo) Validate() error {
+
+// BulkShipmentFormOutboundInfo 出库单信息
+type BulkShipmentFormOutboundInfo struct {
+	AdditionService       []string                      `json:"additionService,omitempty"`       // 附加服务
+	Remark                string                        `json:"remark,omitempty"`                // 备注
+	ShipmentOutboundLabel BulkShipmentFormOutboundLabel `json:"shipmentOutboundLabel,omitempty"` // label 信息
+	SysServiceId          string                        `json:"sysServiceId"`                    // 运输类型 6.客户自己上传物流单号和运单地址 7.不需要打单（客户去仓库自提） 9.使用仓库选择的服务,即要打物流单
+	TrackingNumber        string                        `json:"trackingNumber,omitempty"`        // 物流跟踪号
+}
+
+func (m BulkShipmentFormOutboundInfo) Validate() error {
 	return validation.ValidateStruct(&m,
+		validation.Field(&m.SysServiceId,
+			validation.Required.Error("运输类型不能为空"),
+			validation.In("6", "7", "9").Error("无效的运输类型"),
+		),
+		validation.Field(&m.ShipmentOutboundLabel, validation.When(m.SysServiceId == "6", validation.Required.Error("标签信息不能为空"))),
+		validation.Field(&m.TrackingNumber, validation.When(m.SysServiceId == "6", validation.Required.Error("物流跟踪号不能为空"))),
+	)
+}
+
+// BulkShipmentFormProduct 发货单产品列表
+type BulkShipmentFormProduct struct {
+	OmsSKU   string  `json:"omsSku"`          // 产品 SKU (skuId和omsSku至少传一个)
+	Price    float64 `json:"price,omitempty"` // 单价
+	Quantity int     `json:"qty"`             // 数量
+	SKUId    string  `json:"skuId"`           // 系统产品主键
+}
+
+func (m BulkShipmentFormProduct) Validate() error {
+	return validation.ValidateStruct(&m,
+		validation.Field(&m.Quantity, validation.Min(1).Error("数量不能小于 {{.threshold}}")),
+		validation.Field(&m.OmsSKU, validation.When(m.SKUId == "", validation.Required.Error("产品 SKU/系统产品主键必传其一"))),
+		validation.Field(&m.SKUId, validation.When(m.OmsSKU == "", validation.Required.Error("系统产品主键/产品 SKU 必传其一"))),
+	)
+}
+
+// BulkShipmentFormShippingInfo 发货单基本信息
+type BulkShipmentFormShippingInfo struct {
+	CarrierId     int    `json:"carrierId"`     // 运输商: 1. USPS 2. UPS 3. FedEx 4. DHL 9. Other
+	ShipDate      string `json:"shipDate"`      // 计划执运日期，即计划发货日期，格式：“yyyy-MM-dd 00:00:00”
+	ShipmentSid   string `json:"shipmentSid"`   // shipment 序号
+	SignatureType int    `json:"signatureType"` // 签名类型：1.Indirect (FedEx,UPS only) 2.DIRECT 3.ADULT 4.SERVICE_DEFAULT(default)
+}
+
+func (m BulkShipmentFormShippingInfo) Validate() error {
+	return validation.ValidateStruct(&m,
+		validation.Field(&m.CarrierId,
+			validation.Required.Error("运输商不能为空"),
+			validation.In(1, 2, 3, 4, 9).Error("无效的运输商"),
+		),
 		validation.Field(&m.ShipDate,
 			validation.Required.Error("计划发货日期不能为空"),
 			validation.Date(constant.DatetimeFormat).Error("无效的计划发货日期格式"),
@@ -101,45 +141,70 @@ func (m ShipmentFormShippingInfo) Validate() error {
 	)
 }
 
-type ToAddress struct {
-	AddressLine1 string `json:"addressLine1"` // 收件人地址行1
-	AddressLine2 string `json:"addressLine2"` // 收件人地址行2
-	City         string `json:"city"`         // 城市
-	Company      string `json:"company"`      // 收件人公司
-	CountryCode  string `json:"countryCode"`  // 国家编码，格式标准遵循ISO 3166-1 alpha-2
-	Email        string `json:"email"`        // 收件人邮箱
-	Name         string `json:"name"`         // 收件人姓名
-	Phone        string `json:"phone"`        // 收件人联系电话
-	StateCode    string `json:"stateCode"`    // 州代码，美国为两位大写，如CA、NY
-	ZipCode      string `json:"zipCode"`      // 邮政编码
+// BulkShipmentForm 执运信息，即发货表单
+type BulkShipmentForm struct {
+	International BulkShipmentFormInternational `json:"international"` // 发货单国际单补充
+	OutboundInfo  BulkShipmentFormOutboundInfo  `json:"outboundInfo"`  // 出库单信息
+	ProductList   []BulkShipmentFormProduct     `json:"productList"`   // 发货单产品列表
+	ShippingInfo  BulkShipmentFormShippingInfo  `json:"shippingInfo"`  // 发货单基本信息
 }
 
-func (m ToAddress) Validate() error {
+func (m BulkShipmentFormInternational) Validate() error {
 	return validation.ValidateStruct(&m,
-		validation.Field(&m.ZipCode, validation.Required.Error("收货地址邮编不能为空")),
+		validation.Field(&m.EEIType, validation.In(1, 2).Error("无效的 EFI 类型")),
+		validation.Field(&m.EinOrSsn, validation.Required.Error("EIN 码不能为空")),
+		validation.Field(&m.ForeignTradeRegulation, validation.When(m.EEIType == 1, validation.Required.Error("FTR 码不能为空"))),
+		validation.Field(&m.ITNNumber, validation.When(m.EEIType == 2, validation.Required.Error("ITN 不能为空"))),
 	)
 }
 
-type SubmitOrderRequest struct {
-	OrderNo       string         `json:"orderNo,omitempty"` // openapi 允许客户传入的订单编号
-	OrderSummary  OrderSummary   `json:"OrderSummary"`      // 订单摘要
-	ShipmentForms []ShipmentForm `json:"shipmentForms"`     // 执运信息，即发货表单
-	SID           int            `json:"sid"`               // 当前请求序号，当前请求内不能重复; 是批量传订单的一个标识,只当前请求有效，无业务含义
-	ToAddress     ToAddress      `json:"toAddress"`         // 收货地址
-	WarehouseId   string         `json:"warehouseId"`       // 仓库 ID
+// BulkToAddress 收货地址
+type BulkToAddress struct {
+	AddressLine1 string `json:"addressLine1"`           // 收件人地址1
+	AddressLine2 string `json:"addressLine2,omitempty"` // 收件人地址2
+	City         string `json:"city"`                   // 城市
+	Company      string `json:"company,omitempty"`      // 收件人公司
+	CountryCode  string `json:"countryCode"`            // 国家编码，格式标准遵循ISO 3166-1 alpha-2
+	Email        string `json:"email,omitempty"`        // 收件人邮箱
+	Name         string `json:"name"`                   // 收件人姓名
+	Phone        string `json:"phone"`                  // 收件人联系电话
+	StateCode    string `json:"stateCode"`              // 州代码，美国为两位大写，如CA、NY
+	ZipCode      string `json:"zipCode"`                // 邮政编码
 }
 
-type BatchSubmitOrderRequest []SubmitOrderRequest
+func (m BulkToAddress) Validate() error {
+	return validation.ValidateStruct(&m,
+		validation.Field(&m.AddressLine1, validation.Required.Error("收货地址邮编不能为空")),
+		validation.Field(&m.City, validation.Required.Error("收货城市不能为空")),
+		validation.Field(&m.CountryCode, validation.Required.Error("收货国家编码不能为空")),
+		validation.Field(&m.Email, validation.When(m.Email != "", is.EmailFormat.Error("无效的收件人邮箱"))),
+		validation.Field(&m.Name, validation.Required.Error("收件人姓名不能为空")),
+		validation.Field(&m.Phone, validation.Required.Error("收件人联系电话不能为空")),
+		validation.Field(&m.StateCode, validation.Required.Error("收件人州代码不能为空")),
+		validation.Field(&m.ZipCode, validation.Required.Error("收获邮政编码不能为空")),
+	)
+}
 
-func (m BatchSubmitOrderRequest) Validate() error {
-	or := make([]SubmitOrderRequest, len(m))
+type BulkOrderRequest struct {
+	OrderNo       string             `json:"orderNo,omitempty"` // openapi 允许客户传入的订单编号
+	OrderSummary  BulkOrderSummary   `json:"orderSummary"`      // 订单摘要
+	ShipmentForms []BulkShipmentForm `json:"shipmentForms"`     // 执运信息，即发货表单
+	SID           int                `json:"sid"`               // 当前请求序号，当前请求内不能重复; 是批量传订单的一个标识,只当前请求有效，无业务含义
+	ToAddress     BulkToAddress      `json:"toAddress"`         // 收货地址
+	WarehouseId   string             `json:"warehouseId"`       // 仓库 ID
+}
+
+type BulkOrderRequests []BulkOrderRequest
+
+func (m BulkOrderRequests) Validate() error {
+	requests := make([]BulkOrderRequest, len(m))
 	for i, request := range m {
-		or[i] = request
+		requests[i] = request
 	}
-	return validation.Validate(or,
+	return validation.Validate(requests,
 		validation.Required.Error("请求数据不能为空"),
 		validation.By(func(value interface{}) (err error) {
-			reqs, ok := value.([]SubmitOrderRequest)
+			reqs, ok := value.([]BulkOrderRequest)
 			if !ok {
 				return errors.New("无效的提交订单")
 			}
@@ -147,7 +212,7 @@ func (m BatchSubmitOrderRequest) Validate() error {
 			sids := mapset.NewSet()
 			for _, req := range reqs {
 				err = validation.ValidateStruct(&req,
-					// validation.Field(&m.OrderNo, validation.Required.Error("订单编号不能为空")),
+					validation.Field(&req.OrderNo, validation.When(req.OrderNo != "", validation.Length(1, 32).Error("订单号有效长度为 {{.min}} ~ {{.max}} 个字符"))),
 					validation.Field(&req.WarehouseId, validation.Required.Error("仓库 ID 不能为空")),
 					validation.Field(&req.SID, validation.Required.Error("当前请求序号不能为空")),
 					validation.Field(&req.OrderSummary),
@@ -155,23 +220,24 @@ func (m BatchSubmitOrderRequest) Validate() error {
 					validation.Field(&req.ShipmentForms,
 						validation.Required.Error("发货单不能为空"),
 						validation.Each(validation.WithContext(func(ctx context.Context, value interface{}) error {
-							form, ok := value.(ShipmentForm)
+							form, ok := value.(BulkShipmentForm)
 							if !ok {
 								return errors.New("无效的发货单数据")
 							}
 							return validation.ValidateStruct(&form,
 								validation.Field(&form.International),
+								validation.Field(&form.OutboundInfo),
 								validation.Field(&form.ProductList,
 									validation.Required.Error("发货单产品不能为空"),
 									validation.Each(validation.WithContext(func(ctx context.Context, value interface{}) error {
-										product, ok := value.(ShipmentFormProduct)
+										product, ok := value.(BulkShipmentFormProduct)
 										if !ok {
 											return errors.New("无效的发货单商品")
 										}
 										return validation.ValidateStruct(&product,
 											validation.Field(&product.SKUId, validation.Required.Error("系统产品主键不能为空")),
 											validation.Field(&product.Quantity, validation.Min(1).Error("商品数量不能少于 {{.threshold}}")),
-											validation.Field(&product.Price, validation.Min(0.01).Error("商品数量不能小于 {{.threshold}}")),
+											validation.Field(&product.Price, validation.Min(0.0).Error("商品价格不能小于 {{.threshold}}")),
 										)
 									})),
 								),
@@ -192,14 +258,14 @@ func (m BatchSubmitOrderRequest) Validate() error {
 	)
 }
 
-func (s orderService) BatchSubmit(req BatchSubmitOrderRequest) (items []BatchSubmitResult, err error) {
+func (s orderService) Bulk(req BulkOrderRequests) (items []BulkOrderResult, err error) {
 	if err = req.Validate(); err != nil {
 		return
 	}
 
 	res := struct {
 		NormalResponse
-		Data []BatchSubmitResult `json:"data"`
+		Data []BulkOrderResult `json:"data"`
 	}{}
 
 	resp, err := s.httpClient.R().
