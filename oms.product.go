@@ -14,46 +14,38 @@ type productService service
 
 // 更新产品
 
-// ProductAlias 产品别名
-type ProductAlias struct {
-	SkuId          string `json:"skuId"`
-	Sku            string `json:"sku"`
-	StoreAliasesId string `json:"storeAliasesId"`
-	StoreId        string `json:"storeId"`
-}
-
 type UpdateProductRequest struct {
-	Aliases             []ProductAlias `json:"aliases"`             // 店铺SKU对照，只支持覆盖式的更新
-	Asin                string         `json:"asin"`                // ASIN码
-	BatteryFlag         bool           `json:"batteryFlag"`         // 是否包含电池
-	BatteryType         string         `json:"batteryType"`         // 电池类型，含电池时必传
-	Brand               string         `json:"brand"`               // 品牌
-	CustDescription     string         `json:"custDescription"`     // 产品海关描述
-	DeclaredValue       float64        `json:"declaredValue"`       // 货值
-	DistanceUnit        string         `json:"distanceUnit"`        // 长度单位，仅支持“in”，“cm”，有仓库已审核的不可改
-	Ean                 string         `json:"ean"`                 // EAN码
-	ExtraBarcode1       string         `json:"extraBarcode1"`       // 额外编码
-	FnSku               string         `json:"fnSku"`               // FNSKU码
-	Height              float64        `json:"height"`              // 高度，有仓库已审核的不可改
-	IndividualInventory int            `json:"individualInventory"` // 1.仅有独立库存 2.独立库存+非独立库存
-	Length              float64        `json:"length"`              // 长度，有仓库已审核的不可改
-	MassUnit            string         `json:"massUnit"`            // 重量单位，仅支持“lb”，“kg”，有仓库已审核的不可改
-	OmsSku              string         `json:"omsSku"`              // 系统显示的SKU
-	OriginCountry       string         `json:"originCountry"`       // 	原产地国家，格式标准遵循ISO 3166-1 alpha-2
-	PurchasingCost      float64        `json:"purchasingCost"`      // 采购金额
-	QtyInOnePackage     int            `json:"qtyInOnePackage"`     // 单包裹产品数量,运输类型为直接运输有效
-	QuantityUnit        string         `json:"quantityUnit"`        // 数量单位（来自于承运商要求）
-	ScheduleB           string         `json:"scheduleB"`           // 海关协调码
-	ShippingType        int            `json:"shippingType"`        // 运输类型 1.直接运输 2.需要仓库另外打包，有仓库已审核的不可改
-	SkuId               string         `json:"skuId"`               // 系统的产品主键
-	SkuNameCN           string         `json:"skuNameCN"`           // 商品中文名
-	SkuNameEN           string         `json:"skuNameEN"`           // 商品英文名
-	Typ                 int            `json:"type"`                // 类型 1.单个产品 2.组合产品
-	Upc                 string         `json:"upc"`                 // UPC 码
-	WarehouseIds        []string       `json:"warehouseIds"`        // String型数组，每一条记录均为仓库的warehouseId，不需要传已有的warehouseId，所有传递的会与已审核过的判断，新的仓库进行审核
-	Weight1             float64        `json:"weight1"`             // 重量1 (KG,LB)，有仓库已审核的不可改
-	Weight2             float64        `json:"weight2"`             // 重量2(g,oz)，有仓库已审核的不可改
-	Width               float64        `json:"width"`               // 宽度，有仓库已审核的不可改
+	Aliases             []entity.SKUAlias `json:"aliases"`             // 店铺SKU对照，只支持覆盖式的更新
+	Asin                string            `json:"asin"`                // ASIN码
+	BatteryFlag         bool              `json:"batteryFlag"`         // 是否包含电池
+	BatteryType         string            `json:"batteryType"`         // 电池类型，含电池时必传
+	Brand               string            `json:"brand"`               // 品牌
+	CustDescription     string            `json:"custDescription"`     // 产品海关描述
+	DeclaredValue       float64           `json:"declaredValue"`       // 货值
+	DistanceUnit        string            `json:"distanceUnit"`        // 长度单位，仅支持“in”，“cm”，有仓库已审核的不可改
+	Ean                 string            `json:"ean"`                 // EAN码
+	ExtraBarcode1       string            `json:"extraBarcode1"`       // 额外编码
+	FnSku               string            `json:"fnSku"`               // FNSKU码
+	Height              float64           `json:"height"`              // 高度，有仓库已审核的不可改
+	IndividualInventory int               `json:"individualInventory"` // 1.仅有独立库存 2.独立库存+非独立库存
+	Length              float64           `json:"length"`              // 长度，有仓库已审核的不可改
+	MassUnit            string            `json:"massUnit"`            // 重量单位，仅支持“lb”，“kg”，有仓库已审核的不可改
+	OmsSku              string            `json:"omsSku"`              // 系统显示的SKU
+	OriginCountry       string            `json:"originCountry"`       // 原产地国家，格式标准遵循ISO 3166-1 alpha-2
+	PurchasingCost      float64           `json:"purchasingCost"`      // 采购金额
+	QtyInOnePackage     int               `json:"qtyInOnePackage"`     // 单包裹产品数量,运输类型为直接运输有效
+	QuantityUnit        string            `json:"quantityUnit"`        // 数量单位（来自于承运商要求）
+	ScheduleB           string            `json:"scheduleB"`           // 海关协调码
+	ShippingType        int               `json:"shippingType"`        // 运输类型 1.直接运输 2.需要仓库另外打包，有仓库已审核的不可改
+	SkuId               string            `json:"skuId"`               // 系统的产品主键
+	SkuNameCN           string            `json:"skuNameCN"`           // 商品中文名
+	SkuNameEN           string            `json:"skuNameEN"`           // 商品英文名
+	Typ                 int               `json:"type"`                // 类型 1.单个产品 2.组合产品
+	Upc                 string            `json:"upc"`                 // UPC 码
+	WarehouseIds        []string          `json:"warehouseIds"`        // String型数组，每一条记录均为仓库的warehouseId，不需要传已有的warehouseId，所有传递的会与已审核过的判断，新的仓库进行审核
+	Weight1             float64           `json:"weight1"`             // 重量1 (KG,LB)，有仓库已审核的不可改
+	Weight2             float64           `json:"weight2"`             // 重量2(g,oz)，有仓库已审核的不可改
+	Width               float64           `json:"width"`               // 宽度，有仓库已审核的不可改
 }
 
 func (m UpdateProductRequest) Validate() error {

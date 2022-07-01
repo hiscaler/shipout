@@ -14,14 +14,6 @@ type ProductRecordBundleDetail struct {
 	Note          string `json:"note"`          // 组装信息
 }
 
-// ProductRecordWmsSkuAlias 仓库 SKU 别名
-type ProductRecordWmsSkuAlias struct {
-	SKU            string `json:"sku"`
-	SKUId          string `json:"skuId"`
-	StoreAliasesId string `json:"storeAliasesId"`
-	StoreId        string `json:"storeId"`
-}
-
 type ProductRecordWmsAllStatus struct {
 	SkuId     string `json:"skuId"`
 	AllStatus int    `json:"allStatus"` // 审核状态：1-Approval Pending，2-Approved，3-Rejected，4-Partial Approved，5-Partial Rejected
@@ -103,7 +95,7 @@ type ProductRecordWmsHistory struct {
 
 // ProductRecordWmsSku 仓库
 type ProductRecordWmsSku struct {
-	Aliases               []ProductRecordWmsSkuAlias        `json:"aliases"`
+	Aliases               []SKUAlias                        `json:"aliases"`
 	AllStatus             []ProductRecordWmsAllStatus       `json:"allStatus"`
 	Asin                  string                            `json:"asin"`
 	AuditRemark           string                            `json:"auditRemark"`
