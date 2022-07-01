@@ -24,7 +24,7 @@ func TestService_Bulk(t *testing.T) {
 					},
 					ProductList: []BulkShipmentFormProduct{
 						{
-							SKUId:    "sku001",
+							SKUId:    "1521695517976563714",
 							Quantity: 1,
 							Price:    1,
 						},
@@ -54,7 +54,7 @@ func TestService_Bulk(t *testing.T) {
 				ZipCode:      "25646",
 				Phone:        "+1 123-456-7890 ext. 62214",
 			},
-			WarehouseId: "1",
+			WarehouseId: "1260418082065616897",
 		},
 	}
 	results, err := shipOutClient.OMS.Order.Bulk(req)
