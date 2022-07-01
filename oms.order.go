@@ -267,7 +267,6 @@ func (s orderService) Bulk(req BulkOrderRequests) (items []BulkOrderResult, err 
 		NormalResponse
 		Data []BulkOrderResult `json:"data"`
 	}{}
-
 	resp, err := s.httpClient.R().
 		SetBody(req).
 		Post("/open-api/oms/order/batchSubmit")
@@ -341,6 +340,7 @@ func (s orderService) All(params OrdersQueryParams) (items []entity.OrderRecord,
 		if err = ErrorWrap(res.ErrorCode, res.Message); err == nil {
 			if err = jsoniter.Unmarshal(resp.Body(), &res); err == nil {
 				items = res.Data.Records
+				isLastPage = len(items) < params.PageSize
 			}
 		}
 	} else {

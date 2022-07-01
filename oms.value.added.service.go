@@ -23,7 +23,7 @@ func (m WarehouseValueAddedServicesQueryParams) Validate() error {
 	)
 }
 
-func (s valueAddedService) Warehouses(params WarehouseValueAddedServicesQueryParams) (items []entity.WarehouseValueAddedService, isLastPage bool, err error) {
+func (s valueAddedService) Warehouses(params WarehouseValueAddedServicesQueryParams) (items []entity.WarehouseValueAddedService, err error) {
 	if err = params.Validate(); err != nil {
 		return
 	}
@@ -43,7 +43,6 @@ func (s valueAddedService) Warehouses(params WarehouseValueAddedServicesQueryPar
 		if err = ErrorWrap(res.ErrorCode, res.Message); err == nil {
 			if err = jsoniter.Unmarshal(resp.Body(), &res); err == nil {
 				items = res.Data
-				isLastPage = true
 			}
 		}
 	} else {
