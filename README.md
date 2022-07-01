@@ -52,6 +52,7 @@ shipOutClient.OMS.Product.Xyz()
 ```
 
 - All() 产品列表
+- Update() 更新商品
 
 ## 增值服务
 
