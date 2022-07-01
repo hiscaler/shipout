@@ -117,15 +117,18 @@ type ProductsQueryParams struct {
 	CurPageNo   int      `url:"curPageNo,omitempty"`
 	HiDirection string   `url:"hiDirection,omitempty"`
 	Name        string   `url:"name,omitempty"`
-	omsSku      string   `url:"omsSku,omitempty"`
+	omsSku      string   `url:"omsSku,omitempty"` // 系统显示SKU（用户自定义）
 	OrderColumn string   `url:"orderColumn,omitempty"`
 	PageSize    int      `url:"pageSize,omitempty"`
-	Status      int      `url:"status,omitempty"`
-	Typ         int      `url:"type,omitempty"`
+	Status      int      `url:"status,omitempty"` // 状态：1-active, 2-frozen, 3-archive
+	Typ         int      `url:"type,omitempty"`   // 类型 1.单个产品 2.组合产品 类型不传表示所有
 }
 
 func (m ProductsQueryParams) Validate() error {
-	return nil
+	return validation.ValidateStruct(&m,
+		validation.Field(&m.Status, validation.When(!validation.IsEmpty(m.Status), validation.In(1, 2, 3).Error("无效的状态"))),
+		validation.Field(&m.Typ, validation.When(!validation.IsEmpty(m.Typ), validation.In(1, 2).Error("无效的类型"))),
+	)
 }
 
 func (s productService) All(params ProductsQueryParams) (items []entity.ProductRecord, isLastPage bool, err error) {

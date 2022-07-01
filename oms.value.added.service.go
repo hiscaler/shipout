@@ -18,7 +18,7 @@ type WarehouseValueAddedServicesQueryParams struct {
 
 func (m WarehouseValueAddedServicesQueryParams) Validate() error {
 	return validation.ValidateStruct(&m,
-		validation.Field(&m.Typ, validation.When(m.Typ > 0, validation.In(11, 6, 12, 10, 99).Error("无效的业务类型"))),
+		validation.Field(&m.Typ, validation.When(!validation.IsEmpty(m.Typ), validation.In(11, 6, 12, 10, 99).Error("无效的业务类型"))),
 		validation.Field(&m.WarehouseId, validation.Required.Error("仓库 ID 不能为空")),
 	)
 }
