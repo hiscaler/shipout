@@ -225,38 +225,6 @@ func (s orderService) BatchSubmit(req BatchSubmitOrderRequest) (items []BatchSub
 
 // 订单列表
 
-type OrdersResRecordShipment struct {
-	FeesDetail     string  `json:"feesDetail"`     // 金额详情，格式为{“费用名”: 金额，“费用名”: 金额}
-	LabelStatus    int     `json:"labelStatus"`    // label状态：0,1,2,3,4,5：无须打单,未打单,已打单,运输中,已运输,异常
-	OutboundStatus int     `json:"outboundStatus"` // 0,1,2,3,4：无须建立出库单,未建立,已建立,仓库处理中,已发货
-	OutbundingId   string  `json:"outbundingId"`   // outbundingId
-	Rate           float64 `json:"rate"`           // 金额
-	ShipmentId     string  `json:"shipmentId"`     // shipmentId
-	ShippingRate   float64 `json:"shippingRate"`   // 物流金额
-	TrackingNumber string  `json:"trackingNumber"` // 物流追踪号
-	WarehouseId    string  `json:"warehouseId"`    // 仓库编号
-}
-
-type OrdersResRecord struct {
-	FulfillCharge  float64                   `json:"fulfillCharge"` // 总金额,完成计费后才会有
-	OrderDate      string                    `json:"orderDate"`     // 订单日期
-	OrderId        string                    `json:"orderId"`
-	OrderNO        string                    `json:"orderNO"`
-	RecipientName  string                    `json:"recipientName"`
-	ShipTo         string                    `json:"shipTo"`
-	ShipmentList   []OrdersResRecordShipment `json:"shipmentList"`
-	ShippingCharge float64                   `json:"shippingCharge"` // 运费总金额,打单后就会有
-	Status         int                       `json:"status"`         // 状态
-	ZipCode        string                    `json:"zipCode"`        // 邮编
-}
-
-type OrderRecord struct {
-	FulfillCharge float64 `json:"fulfillCharge"` // 总金额,完成计费后才会有
-	OrderDate     string  `json:"orderDate"`     // 订单日期
-	OrderId       string  `json:"orderId"`
-	OrderNO       string  `json:"orderNO"`
-}
-
 type OrdersQueryParams struct {
 	Asc         bool   `url:"asc,omitempty"`
 	CurPageNo   int    `url:"curPageNo,omitempty"`
@@ -275,7 +243,7 @@ func (m OrdersQueryParams) Validate() error {
 	return nil
 }
 
-func (s orderService) All(params OrdersQueryParams) (items []OrderRecord, isLastPage bool, err error) {
+func (s orderService) All(params OrdersQueryParams) (items []entity.OrderRecord, isLastPage bool, err error) {
 	if err = params.Validate(); err != nil {
 		return
 	}
@@ -283,16 +251,16 @@ func (s orderService) All(params OrdersQueryParams) (items []OrderRecord, isLast
 	res := struct {
 		NormalResponse
 		Data struct {
-			CountId          string        `json:"countId"`
-			Current          int           `json:"current"`
-			HitCount         bool          `json:"hitCount"`
-			MaxLimit         int           `json:"maxLimit"`
-			OptimizeCountSQL bool          `json:"optimizeCountSql"`
-			Pages            int           `json:"pages"`
-			Records          []OrderRecord `json:"records"`
-			IsSearchCount    bool          `json:"IsSearchCount"`
-			Size             string        `json:"size"`
-			Total            string        `json:"total"`
+			CountId          string               `json:"countId"`
+			Current          int                  `json:"current"`
+			HitCount         bool                 `json:"hitCount"`
+			MaxLimit         int                  `json:"maxLimit"`
+			OptimizeCountSQL bool                 `json:"optimizeCountSql"`
+			Pages            int                  `json:"pages"`
+			Records          []entity.OrderRecord `json:"records"`
+			IsSearchCount    bool                 `json:"IsSearchCount"`
+			Size             string               `json:"size"`
+			Total            string               `json:"total"`
 		} `json:"data"`
 	}{}
 
@@ -355,6 +323,48 @@ func (s orderService) One(params OrderQueryParams) (item entity.Order, err error
 		if err = jsoniter.Unmarshal(resp.Body(), &res); err == nil {
 			if err = ErrorWrap(res.ErrorCode, res.Message); err == nil {
 				item = res.Data
+			}
+		}
+	} else {
+		err = errors.New(resp.Status())
+	}
+	return
+}
+
+// 订单取消
+// 取消成功后返回出库单 id
+
+type CancelOrderRequest struct {
+	Name    string `url:"name,omitempty"`
+	OrderId string `url:"order_id"`
+}
+
+func (m CancelOrderRequest) Validate() error {
+	return validation.ValidateStruct(&m,
+		validation.Field(&m.OrderId, validation.Required.Error("订单 ID 不能为空")),
+	)
+}
+
+func (s orderService) Cancel(req CancelOrderRequest) (id string, err error) {
+	if err = req.Validate(); err != nil {
+		return
+	}
+
+	res := struct {
+		NormalResponse
+		Data string `json:"data"`
+	}{}
+	resp, err := s.httpClient.R().
+		SetQueryParamsFromValues(toValues(req)).
+		Post("/open-api/oms/order/cancel")
+	if err != nil {
+		return
+	}
+
+	if resp.IsSuccess() {
+		if err = jsoniter.Unmarshal(resp.Body(), &res); err == nil {
+			if err = ErrorWrap(res.ErrorCode, res.Message); err == nil {
+				id = res.Data
 			}
 		}
 	} else {

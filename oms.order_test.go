@@ -51,7 +51,7 @@ func TestService_BatchSubmit(t *testing.T) {
 	}
 }
 
-func TestOrders(t *testing.T) {
+func TestOrderAll(t *testing.T) {
 	params := OrdersQueryParams{
 		CurPageNo: 1,
 		PageSize:  100,
@@ -64,7 +64,7 @@ func TestOrders(t *testing.T) {
 	}
 }
 
-func TestOrder(t *testing.T) {
+func TestOrderOne(t *testing.T) {
 	params := OrderQueryParams{OrderId: "1521695670086434817"}
 	order, err := shipOutClient.OMS.Order.One(params)
 	if err != nil {

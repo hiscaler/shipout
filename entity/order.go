@@ -26,7 +26,7 @@ type OrderRecipient struct {
 
 // OrderShipmentInternational 发货单国际单补充
 type OrderShipmentInternational struct {
-	EeiType                int    `json:"eeiType"`                // 	EEI类型 1.需要豁免 2.已有ITN Number; 一般总申报金额低于2500时需要豁免
+	EeiType                int    `json:"eeiType"`                // EEI类型 1.需要豁免 2.已有ITN Number; 一般总申报金额低于2500时需要豁免
 	EinOrSsn               string `json:"einOrSsn"`               // 找仓库要的ein码，在美国发国外用的一个雇主识别码，不发国外的话不需要
 	ForeignTradeRegulation string `json:"foreignTradeRegulation"` // FTR码, 如果是去往非加拿大国家的货物,没有超过2500时豁免码为30.37(a); 如果是去往加拿大,没有超过2500时豁免码为30.36
 	ItnNumber              string `json:"itnNumber"`              // ITN Number，EEI类型为已有ITN Number时必传
@@ -35,7 +35,7 @@ type OrderShipmentInternational struct {
 type OrderShipmentPackageDimension struct {
 	DistanceUnit         string  `json:"distanceUnit"`
 	Height               float64 `json:"height"`
-	LenghtWithAroundSize float64 `json:"lenghtWithAroundSize"`
+	LengthWithAroundSize float64 `json:"lenghtWithAroundSize"`
 	Length               float64 `json:"length"`
 	Width                float64 `json:"width"`
 }

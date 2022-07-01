@@ -11,14 +11,44 @@ https://open.shipout.com/portal/documentation/
 
 https://shenyu.apache.org/zh/docs/plugin-center/authority-and-certification/sign-plugin#%E9%89%B4%E6%9D%83%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97
 
+## 使用
+```go
+b, err := os.ReadFile("./config/config_test.json")
+if err != nil {
+    panic(fmt.Sprintf("Read config error: %s", err.Error()))
+}
+var c config.Config
+err = jsoniter.Unmarshal(b, &c)
+if err != nil {
+    panic(fmt.Sprintf("Parse config file error: %s", err.Error()))
+}
+
+shipOutClient := NewShipOut(c)
+params := OrdersQueryParams{
+    CurPageNo: 1,
+    PageSize:  100,
+}
+orders, _, err := shipOutClient.OMS.Order.All(params)
+fmt.Println(orders)
+```
+
 ## ShipOut OMS API
 
-### Base Info
+### 订单
 
-- Warehouses(params WarehousesQueryParams) (items []Warehouse, isLastPage bool, err error) // 仓库列表
+```go
+shipOutClient.OMS.Order.Xyz()
+```
 
-### Order
+- All() 查询订单列表
+- One() 查询单个订单
+- Cancel() 取消订单
+- BatchSubmit() 批量提交订单
 
-- BatchSubmit(req BatchSubmitOrderRequest) (items []BatchSubmitResult, err error)                          // 批量订单提交
-- Orders(params OrdersQueryParams, body OrdersQueryBody) (items []OrderRecord, isLastPage bool, err error) // 订单列表
-- Order(params OrderQueryParams) (item Order, err error)         
+## 基础信息
+
+```go
+shipOutClient.OMS.BaseInfo.Xyz()
+```
+
+- Warehouses() 仓库列表
