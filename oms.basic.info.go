@@ -26,27 +26,13 @@ type Warehouse struct {
 	WarehouseZipCode  string `json:"warehouseZipCode"`  // 仓库邮编
 }
 
-type WarehousesQueryParams struct {
-	Name string `url:"name,omitempty"`
-}
-
-func (m WarehousesQueryParams) Validate() error {
-	return nil
-}
-
 // Warehouses 仓库列表获取接口
-func (s baseInfoService) Warehouses(params WarehousesQueryParams) (items []Warehouse, isLastPage bool, err error) {
-	if err = params.Validate(); err != nil {
-		return
-	}
-
+func (s baseInfoService) Warehouses() (items []Warehouse, err error) {
 	res := struct {
 		NormalResponse
 		Data []Warehouse `json:"data"`
 	}{}
-	resp, err := s.httpClient.R().
-		SetQueryParamsFromValues(toValues(params)).
-		Get("/open-api/oms/info/warehouse/list")
+	resp, err := s.httpClient.R().Get("/open-api/oms/info/warehouse/list")
 	if err != nil {
 		return
 	}

@@ -12,7 +12,6 @@ import (
 type valueAddedService service
 
 type WarehouseValueAddedServicesQueryParams struct {
-	Name        string `url:"name,omitempty"`
 	Typ         int    `url:"type,omitempty"` // 业务类型：11.入库/6.出库-小包/12.出库-大货/10.退货/99.通用
 	WarehouseId string `url:"warehouseId"`    // 仓库 ID
 }

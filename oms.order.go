@@ -357,7 +357,6 @@ func (s orderService) All(params OrdersQueryParams) (items []entity.OrderRecord,
 
 // OrderQueryParams 订单查询参数
 type OrderQueryParams struct {
-	Name        string `url:"name,omitempty"`
 	OrderId     string `url:"orderId,omitempty"`     // 订单id
 	OutboundNO  string `url:"outboundNO,omitempty"`  // 出库单号
 	WarehouseId string `url:"warehouseId,omitempty"` // 仓库 id
@@ -397,22 +396,11 @@ func (s orderService) One(params OrderQueryParams) (item entity.Order, err error
 	return
 }
 
-// 订单取消
+// Cancel 订单取消
 // 取消成功后返回出库单 id
-
-type CancelOrderRequest struct {
-	Name    string `url:"name,omitempty"`
-	OrderId string `url:"order_id"`
-}
-
-func (m CancelOrderRequest) Validate() error {
-	return validation.ValidateStruct(&m,
-		validation.Field(&m.OrderId, validation.Required.Error("订单 ID 不能为空")),
-	)
-}
-
-func (s orderService) Cancel(req CancelOrderRequest) (id string, err error) {
-	if err = req.Validate(); err != nil {
+func (s orderService) Cancel(orderId string) (id string, err error) {
+	if orderId == "" {
+		err = errors.New("订单 ID 不能为空")
 		return
 	}
 
@@ -421,7 +409,7 @@ func (s orderService) Cancel(req CancelOrderRequest) (id string, err error) {
 		Data string `json:"data"`
 	}{}
 	resp, err := s.httpClient.R().
-		SetQueryParamsFromValues(toValues(req)).
+		SetQueryParam("orderId", orderId).
 		Post("/open-api/oms/order/cancel")
 	if err != nil {
 		return
