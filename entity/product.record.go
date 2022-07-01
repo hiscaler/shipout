@@ -8,51 +8,15 @@ type ProductRecordSKUAlias struct {
 
 // ProductRecordBundleDetail 组合详情
 type ProductRecordBundleDetail struct {
-	ParentSkuId   string `json:"parentSkuId"`   // 系统SKU
-	ChildSkuId    string `json:"childSkuId"`    // 子SKU
-	ChildQuantity int    `json:"childQuantity"` // 子SKU在组合中的数量
+	ParentSkuId   string `json:"parentSkuId"`   // 系统 SKU
+	ChildSkuId    string `json:"childSkuId"`    // 子 SKU
+	ChildQuantity int    `json:"childQuantity"` // 子 SKU 在组合中的数量
 	Note          string `json:"note"`          // 组装信息
 }
 
 type ProductRecordWmsAllStatus struct {
-	SkuId     string `json:"skuId"`
+	SKUId     string `json:"skuId"`
 	AllStatus int    `json:"allStatus"` // 审核状态：1-Approval Pending，2-Approved，3-Rejected，4-Partial Approved，5-Partial Rejected
-}
-
-// ProductRecordWmsSkuBundleDetail
-type ProductRecordWmsSkuBundleDetail struct {
-	ASIN             string  `json:"asin"`
-	AuditStatus      int     `json:"auditStatus"`
-	BatteryFlag      bool    `json:"batteryFlag"`
-	Brand            string  `json:"brand"`
-	ChildQuantity    int     `json:"childQuantity"`
-	ChildSkuId       string  `json:"childSkuId"`
-	CreateTime       string  `json:"createTime"`
-	DeclaredValue    float64 `json:"declaredValue"`
-	Dimension        string  `json:"dimension"`
-	DistanceUnit     string  `json:"distanceUnit"`
-	Ean              string  `json:"ean"`
-	ExtraBarcode1    string  `json:"extraBarcode1"`
-	FnSku            string  `json:"fnSku"`
-	Height           float64 `json:"height"`
-	Length           float64 `json:"length"`
-	MassUnit         string  `json:"massUnit"`
-	Note             string  `json:"note"`
-	OmsSku           string  `json:"omsSku"`
-	ParentSkuId      string  `json:"parentSkuId"`
-	ScheduleB        string  `json:"scheduleB"`
-	SerialNumberFlag bool    `json:"serialNumberFlag"`
-	ShippingType     int     `json:"shippingType"`
-	ShortCode        string  `json:"shortCode"`
-	SkuId            string  `json:"skuId"`
-	SkuNameCN        string  `json:"skuNameCN"`
-	SkuNameEN        string  `json:"skuNameEN"`
-	Upc              string  `json:"upc"`
-	UpdateTime       string  `json:"updateTime"`
-	Weight           float64 `json:"weight"`
-	Weight1          float64 `json:"weight1"`
-	Weight2          float64 `json:"weight2"`
-	Width            float64 `json:"width"`
 }
 
 type ProductRecordWmsSkuStockDetailWarehouseStock struct {
@@ -95,88 +59,88 @@ type ProductRecordWmsHistory struct {
 
 // ProductRecordWmsSku 仓库
 type ProductRecordWmsSku struct {
-	Aliases               []SKUAlias                        `json:"aliases"`
-	AllStatus             []ProductRecordWmsAllStatus       `json:"allStatus"`
-	Asin                  string                            `json:"asin"`
-	AuditRemark           string                            `json:"auditRemark"`
-	AuditStatus           int                               `json:"auditStatus"`
-	BatteryFlag           bool                              `json:"batteryFlag"`
-	BatteryFlagStr        string                            `json:"batteryFlagStr"`
-	BatteryType           string                            `json:"batteryType"`
-	Brand                 string                            `json:"brand"`
-	BundleDetail          []ProductRecordWmsSkuBundleDetail `json:"bundleDetail"`
-	CaseDistanceUnit      string                            `json:"caseDistanceUnit"`
-	CaseHeight            float64                           `json:"caseHeight"`
-	CaseLength            float64                           `json:"caseLength"`
-	CaseMassUnit          string                            `json:"caseMassUnit"`
-	CaseWeight            float64                           `json:"caseWeight"`
-	CaseWeight1           float64                           `json:"caseWeight1"`
-	CaseWeight2           float64                           `json:"caseWeight2"`
-	CaseWidth             float64                           `json:"caseWidth"`
-	CreateTime            string                            `json:"createTime"`
-	CustDescription       string                            `json:"custDescription"`
-	DeclaredValue         float64                           `json:"declaredValue"`
-	Dimension             string                            `json:"dimension"`
-	DistanceUnit          string                            `json:"distanceUnit"`
-	Ean                   string                            `json:"ean"`
-	ExtraBarcode1         string                            `json:"extraBarcode1"`
-	FnSku                 string                            `json:"fnSku"`
-	HasOmsSkuHistory      string                            `json:"hasOmsSkuHistory"`
-	Height                float64                           `json:"height"`
-	IndividualInventory   int                               `json:"individualInventory"` // 1.仅有独立库存 2.独立库存+非独立库存
-	InnerQuantity         int                               `json:"innerQuantity"`
-	InventoryThreshold    int                               `json:"inventoryThreshold"`
-	Length                float64                           `json:"length"`
-	LsaQuantity           int                               `json:"lsaQuantity"`
-	MassUnit              string                            `json:"massUnit"`
-	MaterialName          string                            `json:"materialName"` // 包材名称
-	Note                  string                            `json:"note"`
-	OmsSku                string                            `json:"omsSku"`
-	OrgId                 string                            `json:"orgId"`
-	OrgName               string                            `json:"orgName"`
-	OriginCountry         string                            `json:"originCountry"`
-	PackagingMaterialId   string                            `json:"packagingMaterialId"` // 包材ID
-	PackagingMaterialName string                            `json:"packagingMaterialName"`
-	PicFileId             string                            `json:"picFileId"`
-	PicUrl                string                            `json:"picUrl"`
-	PickingLsaQuantity    int                               `json:"pickingLsaQuantity"`
-	PurchasingCost        float64                           `json:"purchasingCost"`
-	QtyInOnePackage       int                               `json:"qtyInOnePackage"`
-	QuantityUnit          string                            `json:"quantityUnit"`
-	ReceiveFirstFlag      bool                              `json:"receiveFirstFlag"`
-	ScheduleB             string                            `json:"scheduleB"`
-	SerialNumberFlag      bool                              `json:"serialNumberFlag"`
-	SerialNumberFlagStr   string                            `json:"serialNumberFlagStr"`
-	ShippingType          int                               `json:"shippingType"`
-	ShortCode             string                            `json:"shortCode"`
-	SkuCartonId           string                            `json:"skuCartonId"`
-	SkuCustomDetailsId    string                            `json:"skuCustomDetailsId"`
-	SkuId                 string                            `json:"skuId"`
-	SkuNameCN             string                            `json:"skuNameCN"`
-	SkuNameEN             string                            `json:"skuNameEN"`
-	SpuId                 string                            `json:"spuId"`
-	Status                int                               `json:"status"`
-	StockDetail           ProductRecordWmsSkuStockDetail    `json:"stockDetail"`
-	Typ                   int                               `json:"type"`
-	Unit                  string                            `json:"unit"`
-	Upc                   string                            `json:"upc"`
-	UpdateTime            string                            `json:"updateTime"`
-	ValueCurrency         string                            `json:"valueCurrency"`
-	VariantName           string                            `json:"variantName"`
-	WarehouseId           string                            `json:"warehouseId"`
-	WarehouseIds          []string                          `json:"warehouseIds"`
-	WarehouseName         string                            `json:"warehouseName"`
-	WarehouseQuantity     int                               `json:"warehouseQuantity"`
-	Weight                float64                           `json:"weight"`
-	Weight1               float64                           `json:"weight1"`
-	Weight2               float64                           `json:"weight2"`
-	WeightDisp            string                            `json:"weightDisp"`
-	Width                 float64                           `json:"width"`
-	WmsHistories          []string                          `json:"wmsHistories"`
-	WmsOrgId              string                            `json:"wmsOrgId"`
-	WmsSkuCartonId        string                            `json:"wmsSkuCartonId"`
-	WmsSkuId              string                            `json:"wmsSkuId"`
-	WmsSkus               []string                          `json:"wmsSkus"`
+	Aliases               []SKUAlias                     `json:"aliases"`
+	AllStatus             []ProductRecordWmsAllStatus    `json:"allStatus"`
+	Asin                  string                         `json:"asin"`
+	AuditRemark           string                         `json:"auditRemark"`
+	AuditStatus           int                            `json:"auditStatus"`
+	BatteryFlag           bool                           `json:"batteryFlag"`
+	BatteryFlagStr        string                         `json:"batteryFlagStr"`
+	BatteryType           string                         `json:"batteryType"`
+	Brand                 string                         `json:"brand"`
+	BundleDetail          []BundleDetail                 `json:"bundleDetail"`
+	CaseDistanceUnit      string                         `json:"caseDistanceUnit"`
+	CaseHeight            float64                        `json:"caseHeight"`
+	CaseLength            float64                        `json:"caseLength"`
+	CaseMassUnit          string                         `json:"caseMassUnit"`
+	CaseWeight            float64                        `json:"caseWeight"`
+	CaseWeight1           float64                        `json:"caseWeight1"`
+	CaseWeight2           float64                        `json:"caseWeight2"`
+	CaseWidth             float64                        `json:"caseWidth"`
+	CreateTime            string                         `json:"createTime"`
+	CustDescription       string                         `json:"custDescription"`
+	DeclaredValue         float64                        `json:"declaredValue"`
+	Dimension             string                         `json:"dimension"`
+	DistanceUnit          string                         `json:"distanceUnit"`
+	Ean                   string                         `json:"ean"`
+	ExtraBarcode1         string                         `json:"extraBarcode1"`
+	FnSku                 string                         `json:"fnSku"`
+	HasOmsSkuHistory      string                         `json:"hasOmsSkuHistory"`
+	Height                float64                        `json:"height"`
+	IndividualInventory   int                            `json:"individualInventory"` // 1.仅有独立库存 2.独立库存+非独立库存
+	InnerQuantity         int                            `json:"innerQuantity"`
+	InventoryThreshold    int                            `json:"inventoryThreshold"`
+	Length                float64                        `json:"length"`
+	LsaQuantity           int                            `json:"lsaQuantity"`
+	MassUnit              string                         `json:"massUnit"`
+	MaterialName          string                         `json:"materialName"` // 包材名称
+	Note                  string                         `json:"note"`
+	OmsSku                string                         `json:"omsSku"`
+	OrgId                 string                         `json:"orgId"`
+	OrgName               string                         `json:"orgName"`
+	OriginCountry         string                         `json:"originCountry"`
+	PackagingMaterialId   string                         `json:"packagingMaterialId"` // 包材ID
+	PackagingMaterialName string                         `json:"packagingMaterialName"`
+	PicFileId             string                         `json:"picFileId"`
+	PicUrl                string                         `json:"picUrl"`
+	PickingLsaQuantity    int                            `json:"pickingLsaQuantity"`
+	PurchasingCost        float64                        `json:"purchasingCost"`
+	QtyInOnePackage       int                            `json:"qtyInOnePackage"`
+	QuantityUnit          string                         `json:"quantityUnit"`
+	ReceiveFirstFlag      bool                           `json:"receiveFirstFlag"`
+	ScheduleB             string                         `json:"scheduleB"`
+	SerialNumberFlag      bool                           `json:"serialNumberFlag"`
+	SerialNumberFlagStr   string                         `json:"serialNumberFlagStr"`
+	ShippingType          int                            `json:"shippingType"`
+	ShortCode             string                         `json:"shortCode"`
+	SkuCartonId           string                         `json:"skuCartonId"`
+	SkuCustomDetailsId    string                         `json:"skuCustomDetailsId"`
+	SkuId                 string                         `json:"skuId"`
+	SkuNameCN             string                         `json:"skuNameCN"`
+	SkuNameEN             string                         `json:"skuNameEN"`
+	SpuId                 string                         `json:"spuId"`
+	Status                int                            `json:"status"`
+	StockDetail           ProductRecordWmsSkuStockDetail `json:"stockDetail"`
+	Typ                   int                            `json:"type"`
+	Unit                  string                         `json:"unit"`
+	Upc                   string                         `json:"upc"`
+	UpdateTime            string                         `json:"updateTime"`
+	ValueCurrency         string                         `json:"valueCurrency"`
+	VariantName           string                         `json:"variantName"`
+	WarehouseId           string                         `json:"warehouseId"`
+	WarehouseIds          []string                       `json:"warehouseIds"`
+	WarehouseName         string                         `json:"warehouseName"`
+	WarehouseQuantity     int                            `json:"warehouseQuantity"`
+	Weight                float64                        `json:"weight"`
+	Weight1               float64                        `json:"weight1"`
+	Weight2               float64                        `json:"weight2"`
+	WeightDisp            string                         `json:"weightDisp"`
+	Width                 float64                        `json:"width"`
+	WmsHistories          []string                       `json:"wmsHistories"`
+	WmsOrgId              string                         `json:"wmsOrgId"`
+	WmsSkuCartonId        string                         `json:"wmsSkuCartonId"`
+	WmsSkuId              string                         `json:"wmsSkuId"`
+	WmsSkus               []string                       `json:"wmsSkus"`
 }
 
 type ProductRecord struct {
