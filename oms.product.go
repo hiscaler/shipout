@@ -112,14 +112,10 @@ func (s productService) Update(req UpdateProductRequest) error {
 // 产品列表获取
 
 type ProductsQueryParams struct {
-	Asc         bool     `url:"asc,omitempty"`
+	queryParams
 	auditStatus []string `url:"audit_status,omitempty"`
-	CurPageNo   int      `url:"curPageNo,omitempty"`
-	HiDirection string   `url:"hiDirection,omitempty"`
 	Name        string   `url:"name,omitempty"`
 	omsSku      string   `url:"omsSku,omitempty"` // 系统显示SKU（用户自定义）
-	OrderColumn string   `url:"orderColumn,omitempty"`
-	PageSize    int      `url:"pageSize,omitempty"`
 	Status      int      `url:"status,omitempty"` // 状态：1-active, 2-frozen, 3-archive
 	Typ         int      `url:"type,omitempty"`   // 类型 1.单个产品 2.组合产品 类型不传表示所有
 }
@@ -136,6 +132,7 @@ func (s productService) All(params ProductsQueryParams) (items []entity.ProductR
 		return
 	}
 
+	params.TidyVars()
 	res := struct {
 		NormalResponse
 		Data struct {
@@ -147,7 +144,6 @@ func (s productService) All(params ProductsQueryParams) (items []entity.ProductR
 			Total       string                 `json:"total"`
 		} `json:"data"`
 	}{}
-
 	resp, err := s.httpClient.R().
 		SetQueryParamsFromValues(toValues(params)).
 		Get("/open-api/oms/product/queryList")
@@ -159,6 +155,7 @@ func (s productService) All(params ProductsQueryParams) (items []entity.ProductR
 		if err = ErrorWrap(res.ErrorCode, res.Message); err == nil {
 			if err = jsoniter.Unmarshal(resp.Body(), &res); err == nil {
 				items = res.Data.Records
+				isLastPage = len(items) < params.PageSize
 			}
 		}
 	} else {

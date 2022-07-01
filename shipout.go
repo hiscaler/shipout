@@ -4,13 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-resty/resty/v2"
-	"github.com/google/go-querystring/query"
 	"github.com/hiscaler/gox/cryptox"
 	"github.com/hiscaler/shipout-go/config"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/json-iterator/go/extra"
 	"log"
-	"net/url"
 	"os"
 	"sort"
 	"strconv"
@@ -149,10 +147,4 @@ func ErrorWrap(code string, message string) error {
 	if message == "" {
 	}
 	return fmt.Errorf("%s: %s", code, message)
-}
-
-// change to url.values
-func toValues(i interface{}) (values url.Values) {
-	values, _ = query.Values(i)
-	return
 }

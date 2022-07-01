@@ -291,17 +291,13 @@ func (s orderService) Bulk(req BulkOrderRequests) (items []BulkOrderResult, err 
 // 订单列表
 
 type OrdersQueryParams struct {
-	Asc         bool   `url:"asc,omitempty"`
-	CurPageNo   int    `url:"curPageNo,omitempty"`
-	HiDirection string `url:"hiDirection,omitempty"`
+	queryParams
 	Name        string `url:"name,omitempty"`
-	OrderColumn string `url:"orderColumn,omitempty"`
 	OrderNo     string `url:"orderNO,omitempty"`
 	OrgId       string `url:"orgId,omitempty"`
 	ServerOrgId string `url:"serverOrgId,omitempty"`
 	Status      int    `url:"status,omitempty"` // 1.Awaiting Payment 2.Awaiting Fulillment 3.Being Fulilled 4.Shipped 5.Delievered 6.Cancelled 7.RMA Initiated 8.RMA Processing 9.RMA Completed
 	WarehouseId string `url:"warehouseId,omitempty"`
-	PageSize    int    `url:"pageSize,omitempty"`
 }
 
 func (m OrdersQueryParams) Validate() error {
@@ -313,6 +309,7 @@ func (s orderService) All(params OrdersQueryParams) (items []entity.OrderRecord,
 		return
 	}
 
+	params.TidyVars()
 	res := struct {
 		NormalResponse
 		Data struct {
