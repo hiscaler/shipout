@@ -89,7 +89,6 @@ func (s productService) Update(req UpdateProductRequest) error {
 	res := struct {
 		NormalResponse
 	}{}
-
 	resp, err := s.httpClient.R().
 		SetBody(req).
 		Get("/open-api/oms/product/modify")
@@ -114,7 +113,6 @@ func (s productService) Update(req UpdateProductRequest) error {
 type ProductsQueryParams struct {
 	queryParams
 	auditStatus []string `url:"audit_status,omitempty"`
-	Name        string   `url:"name,omitempty"`
 	omsSku      string   `url:"omsSku,omitempty"` // 系统显示SKU（用户自定义）
 	Status      int      `url:"status,omitempty"` // 状态：1-active, 2-frozen, 3-archive
 	Typ         int      `url:"type,omitempty"`   // 类型 1.单个产品 2.组合产品 类型不传表示所有

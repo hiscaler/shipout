@@ -292,7 +292,6 @@ func (s orderService) Bulk(req BulkOrderRequests) (items []BulkOrderResult, err 
 
 type OrdersQueryParams struct {
 	queryParams
-	Name        string `url:"name,omitempty"`
 	OrderNo     string `url:"orderNO,omitempty"`
 	OrgId       string `url:"orgId,omitempty"`
 	ServerOrgId string `url:"serverOrgId,omitempty"`
@@ -301,7 +300,9 @@ type OrdersQueryParams struct {
 }
 
 func (m OrdersQueryParams) Validate() error {
-	return nil
+	return validation.ValidateStruct(&m,
+		validation.Field(&m.Status, validation.When(!validation.IsEmpty(m.Status), validation.In(1, 2, 3, 4, 5, 6, 7, 8, 9).Error("无效的状态"))),
+	)
 }
 
 func (s orderService) All(params OrdersQueryParams) (items []entity.OrderRecord, isLastPage bool, err error) {
@@ -325,7 +326,6 @@ func (s orderService) All(params OrdersQueryParams) (items []entity.OrderRecord,
 			Total            string               `json:"total"`
 		} `json:"data"`
 	}{}
-
 	resp, err := s.httpClient.R().
 		SetQueryParamsFromValues(toValues(params)).
 		Get("/open-api/oms/order/queryListV2")
