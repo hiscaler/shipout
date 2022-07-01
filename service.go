@@ -16,7 +16,8 @@ type wmsServices struct {
 
 // OMS API Services
 type omsServices struct {
-	BaseInfo baseInfoService
-	Product  productService
-	Order    orderService
+	BaseInfo          baseInfoService
+	Product           productService
+	ValueAddedService valueAddedService
+	Order             orderService
 }

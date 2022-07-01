@@ -53,6 +53,14 @@ shipOutClient.OMS.Product.Xyz()
 
 - All() 产品列表
 
+## 增值服务
+
+```go
+shipOutClient.OMS.ValueAddedService.Xyz()
+```
+
+- Warehouses() 仓库增值服务
+
 ## 基础信息
 
 ```go
