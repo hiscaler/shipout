@@ -45,6 +45,14 @@ shipOutClient.OMS.Order.Xyz()
 - One() 查询单个订单
 - Cancel() 取消订单
 
+## 产品
+
+```go
+shipOutClient.OMS.Product.Xyz()
+```
+
+- All() 产品列表
+
 ## 基础信息
 
 ```go
