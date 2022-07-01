@@ -64,36 +64,61 @@ for {
 
 ### 订单
 
+- Bulk() 批量提交订单
+
 ```go
-shipOutClient.OMS.Order.Xyz()
+req := BulkOrderRequest{}
+shipOutClient.OMS.Order.Bulk(req)
 ```
 
-- Bulk() 批量提交订单
 - All() 查询订单列表
+
+```go
+parmas := OrdersQueryParams()
+orders, isLastPage, err := shipOutClient.OMS.Order.All(params)
+```
+
 - One() 查询单个订单
+
+```go
+params := OrderQueryParams{}
+order, err := shipOutClient.OMS.Order.One(params)
+```
+
 - Cancel() 取消订单
+
+```go
+id, err := shipOutClient.OMS.Order.Cancel(orderId)
+```
 
 ## 产品
 
+- All() 产品列表
+
 ```go
-shipOutClient.OMS.Product.Xyz()
+params := ProductsQueryParams{}
+products, isLastPage, err := shipOutClient.OMS.Product.All(params)
 ```
 
-- All() 产品列表
 - Update() 更新商品
+
+```go
+req := UpdateProductRequest{}
+err := shipOutClient.OMS.Product.Update(req)
+```
 
 ## 增值服务
 
-```go
-shipOutClient.OMS.ValueAddedService.Xyz()
-```
-
 - Warehouses() 仓库增值服务
+
+```go
+warehouses, err := shipOutClient.OMS.ValueAddedService.Warehouses()
+```
 
 ## 基础信息
 
-```go
-shipOutClient.OMS.BaseInfo.Xyz()
-```
-
 - Warehouses() 仓库列表
+
+```go
+warehouses, err := shipOutClient.OMS.BaseInfo.Warehouses()
+```
