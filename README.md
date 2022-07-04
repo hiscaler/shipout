@@ -25,10 +25,9 @@ if err != nil {
 }
 
 shipOutClient := NewShipOut(c)
-params := OrdersQueryParams{
-    CurPageNo: 1,
-    PageSize:  100,
-}
+params := OrdersQueryParams{}
+params.CurPageNo = 1
+params.PageSize = 100
 orders, _, err := shipOutClient.OMS.Order.All(params)
 fmt.Println(orders)
 ```
@@ -43,10 +42,9 @@ All() 方法会返回三个值，分别是：
 
 您可以使用以下代码来获取所有的数据，例如：
 ```go
-params := OrdersQueryParams{
-    CurPageNo: 1,
-    PageSize:  100,
-}
+params := OrdersQueryParams{}
+params.CurPageNo = 1
+params.PageSize = 100
 for {    
     orders, isLastPage, err := shipOutClient.OMS.Order.All(params)
     if err != nil {
@@ -112,7 +110,7 @@ err := shipOutClient.OMS.Product.Update(req)
 - Warehouses() 仓库增值服务
 
 ```go
-warehouses, err := shipOutClient.OMS.ValueAddedService.Warehouses()
+warehouseValueAddedServices, err := shipOutClient.OMS.ValueAddedService.Warehouses()
 ```
 
 ## 基础信息

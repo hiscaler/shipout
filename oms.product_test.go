@@ -6,10 +6,9 @@ import (
 )
 
 func TestProductAll(t *testing.T) {
-	params := ProductsQueryParams{
-		CurPageNo: 1,
-		PageSize:  100,
-	}
+	params := ProductsQueryParams{}
+	params.CurPageNo = 1
+	params.PageSize = 100
 	orders, _, err := shipOutClient.OMS.Product.All(params)
 	if err != nil {
 		t.Errorf(err.Error())

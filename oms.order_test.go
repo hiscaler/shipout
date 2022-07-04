@@ -66,10 +66,9 @@ func TestService_Bulk(t *testing.T) {
 }
 
 func TestOrderAll(t *testing.T) {
-	params := OrdersQueryParams{
-		CurPageNo: 1,
-		PageSize:  100,
-	}
+	params := OrdersQueryParams{}
+	params.CurPageNo = 1
+	params.PageSize = 100
 	orders, _, err := shipOutClient.OMS.Order.All(params)
 	if err != nil {
 		t.Errorf(err.Error())
