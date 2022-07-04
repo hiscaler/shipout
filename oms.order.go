@@ -174,14 +174,14 @@ type BulkToAddress struct {
 
 func (m BulkToAddress) Validate() error {
 	return validation.ValidateStruct(&m,
-		validation.Field(&m.AddressLine1, validation.Required.Error("收货地址邮编不能为空")),
-		validation.Field(&m.City, validation.Required.Error("收货城市不能为空")),
-		validation.Field(&m.CountryCode, validation.Required.Error("收货国家编码不能为空")),
+		validation.Field(&m.AddressLine1, validation.Required.Error("收件人地址1不能为空")),
+		validation.Field(&m.City, validation.Required.Error("收件人所在城市不能为空")),
+		validation.Field(&m.CountryCode, validation.Required.Error("收件人所在国家编码不能为空")),
 		validation.Field(&m.Email, validation.When(m.Email != "", is.EmailFormat.Error("无效的收件人邮箱"))),
 		validation.Field(&m.Name, validation.Required.Error("收件人姓名不能为空")),
 		validation.Field(&m.Phone, validation.Required.Error("收件人联系电话不能为空")),
-		validation.Field(&m.StateCode, validation.Required.Error("收件人州代码不能为空")),
-		validation.Field(&m.ZipCode, validation.Required.Error("收获邮政编码不能为空")),
+		validation.Field(&m.StateCode, validation.Required.Error("收件人所在州代码不能为空")),
+		validation.Field(&m.ZipCode, validation.Required.Error("收件人邮政编码不能为空")),
 	)
 }
 
@@ -243,7 +243,8 @@ func (m BulkOrderRequests) Validate() error {
 								),
 								validation.Field(&form.ShippingInfo),
 							)
-						}))),
+						})),
+					),
 				)
 				if err != nil {
 					return
