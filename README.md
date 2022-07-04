@@ -32,9 +32,11 @@ orders, _, err := shipOutClient.OMS.Order.All(params)
 fmt.Println(orders)
 ```
 
-## 说明
+## 方法调用说明
 
-All() 方法会返回三个值，分别是：
+### 带翻页的列表数据
+
+如果是带有翻页的数据，对应的方法会有三个返回值（比如：All()），分别是：
 
 - 获取到的数据
 - 是否为最后一页
@@ -48,9 +50,9 @@ params.PageSize = 100
 for {    
     orders, isLastPage, err := shipOutClient.OMS.Order.All(params)
     if err != nil {
-        panic(err)	
+        panic(err)
     }
-    // orders 业务处理
+    // 根据返回的 orders 进行业务处理
     if isLastPage {
         break
     }
@@ -58,7 +60,17 @@ for {
 }
 ```
 
-## ShipOut OMS API
+需要获取所有值，您可以使用 for 循环调用对应的方法，并且不断的累加 CurPageNo 参数，直到 isLastPage 返回 true 为止。
+
+### 不带翻页的列表数据
+
+如果不带有翻页，则方法调用后只会有两个返回值，分别为数据集和错误。
+
+### 其他
+
+在任何情况下，您都应该首先判断是否返回错误，然后再进行下一步的业务逻辑处理。
+
+## ShipOut OMS API 方法实现
 
 ### 订单
 
