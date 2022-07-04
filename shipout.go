@@ -136,5 +136,8 @@ func ErrorWrap(code string, messages ...string) error {
 			break
 		}
 	}
-	return fmt.Errorf("%s: %s", code, strings.TrimSpace(msg))
+	if code == "" {
+		return errors.New(msg)
+	}
+	return fmt.Errorf("%s: %s", code, msg)
 }
