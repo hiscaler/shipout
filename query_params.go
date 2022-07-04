@@ -23,9 +23,9 @@ func (q *queryParams) TidyVars() *queryParams {
 		q.CurPageNo = 1
 	}
 	if q.PageSize <= 0 {
-		q.PageSize = 10
-	} else if q.PageSize > 100 {
-		q.PageSize = 100
+		q.PageSize = 20
+	} else if q.PageSize > 500 {
+		q.PageSize = 500
 	}
 	if q.HiDirection == "" {
 		q.HiDirection = SortDesc
