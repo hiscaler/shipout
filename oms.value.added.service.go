@@ -1,7 +1,6 @@
 package shipout
 
 import (
-	"errors"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/hiscaler/shipout-go/entity"
 	jsoniter "github.com/json-iterator/go"
@@ -39,18 +38,8 @@ func (s valueAddedService) Warehouses(params WarehouseValueAddedServicesQueryPar
 		return
 	}
 
-	if resp.IsSuccess() {
-		if err = ErrorWrap(res.ErrorCode, res.Message); err == nil {
-			if err = jsoniter.Unmarshal(resp.Body(), &res); err == nil {
-				items = res.Data
-			}
-		}
-	} else {
-		if e := jsoniter.Unmarshal(resp.Body(), &res); e == nil {
-			err = ErrorWrap(res.ErrorCode, res.Message)
-		} else {
-			err = errors.New(resp.Status())
-		}
+	if err = jsoniter.Unmarshal(resp.Body(), &res); err == nil {
+		items = res.Data
 	}
 	return
 }

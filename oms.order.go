@@ -275,16 +275,8 @@ func (s orderService) Bulk(req BulkOrderRequests) (items []BulkOrderResult, err 
 		return
 	}
 
-	if resp.IsSuccess() {
-		if err = ErrorWrap(res.ErrorCode, res.Message); err == nil {
-			items = res.Data
-		}
-	} else {
-		if e := jsoniter.Unmarshal(resp.Body(), &res); e == nil {
-			err = ErrorWrap(res.ErrorCode, res.Message)
-		} else {
-			err = errors.New(resp.Status())
-		}
+	if err = jsoniter.Unmarshal(resp.Body(), &res); err == nil {
+		items = res.Data
 	}
 	return
 }
@@ -334,19 +326,9 @@ func (s orderService) All(params OrdersQueryParams) (items []entity.OrderRecord,
 		return
 	}
 
-	if resp.IsSuccess() {
-		if err = ErrorWrap(res.ErrorCode, res.Message); err == nil {
-			if err = jsoniter.Unmarshal(resp.Body(), &res); err == nil {
-				items = res.Data.Records
-				isLastPage = len(items) < params.PageSize
-			}
-		}
-	} else {
-		if e := jsoniter.Unmarshal(resp.Body(), &res); e == nil {
-			err = ErrorWrap(res.ErrorCode, res.Message)
-		} else {
-			err = errors.New(resp.Status())
-		}
+	if err = jsoniter.Unmarshal(resp.Body(), &res); err == nil {
+		items = res.Data.Records
+		isLastPage = len(items) < params.PageSize
 	}
 	return
 }
@@ -382,14 +364,8 @@ func (s orderService) One(params OrderQueryParams) (item entity.Order, err error
 		return
 	}
 
-	if resp.IsSuccess() {
-		if err = jsoniter.Unmarshal(resp.Body(), &res); err == nil {
-			if err = ErrorWrap(res.ErrorCode, res.Message); err == nil {
-				item = res.Data
-			}
-		}
-	} else {
-		err = errors.New(resp.Status())
+	if err = jsoniter.Unmarshal(resp.Body(), &res); err == nil {
+		item = res.Data
 	}
 	return
 }
@@ -413,14 +389,8 @@ func (s orderService) Cancel(orderId string) (id string, err error) {
 		return
 	}
 
-	if resp.IsSuccess() {
-		if err = jsoniter.Unmarshal(resp.Body(), &res); err == nil {
-			if err = ErrorWrap(res.ErrorCode, res.Message); err == nil {
-				id = res.Data
-			}
-		}
-	} else {
-		err = errors.New(resp.Status())
+	if err = jsoniter.Unmarshal(resp.Body(), &res); err == nil {
+		id = res.Data
 	}
 	return
 }

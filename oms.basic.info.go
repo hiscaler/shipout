@@ -1,7 +1,6 @@
 package shipout
 
 import (
-	"errors"
 	jsoniter "github.com/json-iterator/go"
 )
 
@@ -37,18 +36,8 @@ func (s baseInfoService) Warehouses() (items []Warehouse, err error) {
 		return
 	}
 
-	if resp.IsSuccess() {
-		if err = ErrorWrap(res.ErrorCode, res.Message); err == nil {
-			if err = jsoniter.Unmarshal(resp.Body(), &res); err == nil {
-				items = res.Data
-			}
-		}
-	} else {
-		if e := jsoniter.Unmarshal(resp.Body(), &res); e == nil {
-			err = ErrorWrap(res.ErrorCode, res.Message)
-		} else {
-			err = errors.New(resp.Status())
-		}
+	if err = jsoniter.Unmarshal(resp.Body(), &res); err == nil {
+		items = res.Data
 	}
 	return
 }

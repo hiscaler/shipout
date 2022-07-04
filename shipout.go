@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-resty/resty/v2"
+	"github.com/hiscaler/gox/bytex"
 	"github.com/hiscaler/gox/cryptox"
 	"github.com/hiscaler/shipout-go/config"
 	jsoniter "github.com/json-iterator/go"
@@ -74,20 +75,22 @@ func NewShipOut(config config.Config) *ShipOut {
 			return nil
 		}).
 		OnAfterResponse(func(client *resty.Client, response *resty.Response) (err error) {
-			if response.IsSuccess() {
-				r := struct {
-					Result    string `json:"result"`
-					ErrorCode string `json:"ErrorCode"`
-					Message   string `json:"message"`
-				}{}
-				if err = jsoniter.Unmarshal(response.Body(), &r); err == nil {
-					code := r.ErrorCode
-					if code == "" {
-						code = r.Result
-					}
-					err = ErrorWrap(code, r.Message)
+			if response.IsError() {
+				return fmt.Errorf("%s: %s", response.Status(), bytex.ToString(response.Body()))
+			}
+
+			r := struct {
+				Result         string `json:"result"`
+				ErrorCode      string `json:"ErrorCode"`
+				Message        string `json:"message"`
+				ChineseMessage string `json:"zhMessage"`
+			}{}
+			if err = jsoniter.Unmarshal(response.Body(), &r); err == nil {
+				if r.Result != "OK" {
+					err = ErrorWrap(r.ErrorCode, r.ChineseMessage, r.Message)
 				}
 			}
+
 			if err != nil {
 				logger.Printf("OnAfterResponse error: %s", err.Error())
 			}
@@ -124,13 +127,14 @@ type NormalResponse struct {
 }
 
 // ErrorWrap 错误包装
-func ErrorWrap(code string, message string) error {
-	if code == "" || code == "OK" {
-		return nil
+func ErrorWrap(code string, messages ...string) error {
+	msg := ""
+	for _, message := range messages {
+		message = strings.TrimSpace(message)
+		if message != "" {
+			msg = message
+			break
+		}
 	}
-
-	message = strings.TrimSpace(message)
-	if message == "" {
-	}
-	return fmt.Errorf("%s: %s", code, message)
+	return fmt.Errorf("%s: %s", code, strings.TrimSpace(msg))
 }

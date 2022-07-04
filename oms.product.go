@@ -1,7 +1,6 @@
 package shipout
 
 import (
-	"errors"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/hiscaler/shipout-go/entity"
 	jsoniter "github.com/json-iterator/go"
@@ -86,25 +85,8 @@ func (s productService) Update(req UpdateProductRequest) error {
 		return err
 	}
 
-	res := struct {
-		NormalResponse
-	}{}
-	resp, err := s.httpClient.R().
-		SetBody(req).
+	_, err = s.httpClient.R().
 		Get("/open-api/oms/product/modify")
-	if err != nil {
-		return err
-	}
-
-	if resp.IsSuccess() {
-		err = ErrorWrap(res.ErrorCode, res.Message)
-	} else {
-		if e := jsoniter.Unmarshal(resp.Body(), &res); e == nil {
-			err = ErrorWrap(res.ErrorCode, res.Message)
-		} else {
-			err = errors.New(resp.Status())
-		}
-	}
 	return err
 }
 
@@ -149,19 +131,9 @@ func (s productService) All(params ProductsQueryParams) (items []entity.ProductR
 		return
 	}
 
-	if resp.IsSuccess() {
-		if err = ErrorWrap(res.ErrorCode, res.Message); err == nil {
-			if err = jsoniter.Unmarshal(resp.Body(), &res); err == nil {
-				items = res.Data.Records
-				isLastPage = len(items) < params.PageSize
-			}
-		}
-	} else {
-		if e := jsoniter.Unmarshal(resp.Body(), &res); e == nil {
-			err = ErrorWrap(res.ErrorCode, res.Message)
-		} else {
-			err = errors.New(resp.Status())
-		}
+	if err = jsoniter.Unmarshal(resp.Body(), &res); err == nil {
+		items = res.Data.Records
+		isLastPage = len(items) < params.PageSize
 	}
 	return
 }
