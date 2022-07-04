@@ -28,29 +28,16 @@ func init() {
 
 var ErrNotFound = errors.New("shipout: not found")
 
-type queryDefaultValues struct {
-	PageNo   int // 当前页
-	PageSize int // 每页数据量
-}
-
 type ShipOut struct {
-	Debug              bool               // 是否调试模式
-	Client             *resty.Client      // HTTP 客户端
-	Logger             *log.Logger        // 日志
-	EnableCache        bool               // 是否激活缓存
-	QueryDefaultValues queryDefaultValues // 查询默认值
-	OMS                omsServices        // OMS API Services
+	Debug       bool        // 是否调试模式
+	EnableCache bool        // 是否激活缓存
+	OMS         omsServices // OMS API Services
 }
 
 func NewShipOut(config config.Config) *ShipOut {
 	logger := log.New(os.Stdout, "[ ShipOut ] ", log.LstdFlags|log.Llongfile)
 	shipOutClient := &ShipOut{
-		Debug:  config.Debug,
-		Logger: logger,
-		QueryDefaultValues: queryDefaultValues{
-			PageNo:   1,
-			PageSize: 100,
-		},
+		Debug: config.Debug,
 	}
 	httpClient := resty.New().
 		SetDebug(config.Debug).
@@ -112,7 +99,6 @@ func NewShipOut(config config.Config) *ShipOut {
 	}
 	httpClient.JSONMarshal = jsoniter.Marshal
 	httpClient.JSONUnmarshal = jsoniter.Unmarshal
-	shipOutClient.Client = httpClient
 	xService := service{
 		debug:      config.Debug,
 		logger:     logger,

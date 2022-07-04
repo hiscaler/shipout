@@ -7,8 +7,7 @@ import (
 )
 
 func TestWarehouses(t *testing.T) {
-	params := WarehousesQueryParams{}
-	warehouses, _, err := shipOutClient.OMS.BaseInfo.Warehouses(params)
+	warehouses, err := shipOutClient.OMS.BaseInfo.Warehouses()
 	if err != nil {
 		t.Errorf(err.Error())
 	} else {
