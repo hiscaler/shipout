@@ -103,6 +103,13 @@ id, err := shipOutClient.OMS.Order.Cancel(orderId)
 
 ## 产品
 
+- Bulk() 批量创建产品
+
+```go
+req := BulkProductRequest{}
+err := shipOutClient.OMS.Product.Bulk(req)
+```
+
 - All() 产品列表
 
 ```go
