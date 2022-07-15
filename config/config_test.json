@@ -1,6 +1,6 @@
 {
   "debug": true,
-  "authorization": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJvcmdUeXBlIjoxLCJvcmdOYW1lIjoiaSBhbSB0aGUgYXBwbGUiLCJzY29wZSI6WyJvcGVuLWFwaSJdLCJ0aW1lWm9uZSI6IkFtZXJpY2EvQ2hpY2FnbyIsInVzZXJOYW1lIjoib21zVXNlcjEiLCJ1c2VySWQiOiIxMCIsImp0aSI6IjFmNjcwOTJmLTc0ZjMtNGJiNS1hNTlmLWYyZjhlYTc0NmEyMiIsIm9yZ0lkIjoiMTAwMDIiLCJjbGllbnRfaWQiOiJvcGVuLWFwaS11aSIsImV4cCI6MTY3ODQ1NDU5OTE0OSwiZXplZXNoaXBVc2VySWQiOjE3MDB9.EMB0PGLS6QKuemRKmTPkS3oIpboHqc3S1L3U1G0z7ig",
+  "authorization": "",
   "appKey": "",
   "secretKey": ""
 }
