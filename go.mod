@@ -7,7 +7,7 @@ require (
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/google/go-querystring v1.1.0
-	github.com/hiscaler/gox v0.0.0-20220629052934-54366dbaee3b
+	github.com/hiscaler/gox v0.0.0-20220713075909-816721a76643
 	github.com/json-iterator/go v1.1.12
 )
 
