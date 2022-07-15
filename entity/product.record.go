@@ -121,7 +121,7 @@ type ProductRecordWmsSku struct {
 	SpuId                 string                         `json:"spuId"`
 	Status                int                            `json:"status"`
 	StockDetail           ProductRecordWmsSkuStockDetail `json:"stockDetail"`
-	Typ                   int                            `json:"type"`
+	Type                  int                            `json:"type"`
 	Unit                  string                         `json:"unit"`
 	Upc                   string                         `json:"upc"`
 	UpdateTime            string                         `json:"updateTime"`
@@ -174,7 +174,7 @@ type ProductRecord struct {
 	SkuNameCN           string                      `json:"skuNameCN"`           // 产品中文名
 	SkuNameEN           string                      `json:"skuNameEN"`           // 产品英文名
 	Status              int                         `json:"status"`              // 状态 1.待审核 2.已审核 3.已归档
-	Typ                 int                         `json:"type"`                // 类型 1.单个产品 2.组合产品
+	Type                int                         `json:"type"`                // 类型 1.单个产品 2.组合产品
 	Upc                 string                      `json:"upc"`                 // UPC 码
 	ValueCurrency       string                      `json:"valueCurrency"`       // 货值币种，格式标准遵循ISO 4217
 	WarehouseIds        []string                    `json:"warehouseIds"`        // 新增/修改 产品时选择的仓库列表

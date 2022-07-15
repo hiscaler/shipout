@@ -41,7 +41,7 @@ type UpdateProductRequest struct {
 	SkuId               string                `json:"skuId"`               // 系统的产品主键
 	SkuNameCN           string                `json:"skuNameCN"`           // 商品中文名
 	SkuNameEN           string                `json:"skuNameEN"`           // 商品英文名
-	Typ                 int                   `json:"type"`                // 类型 1.单个产品 2.组合产品
+	Type                int                   `json:"type"`                // 类型 1.单个产品 2.组合产品
 	Upc                 string                `json:"upc"`                 // UPC 码
 	WarehouseIds        []string              `json:"warehouseIds"`        // String型数组，每一条记录均为仓库的warehouseId，不需要传已有的warehouseId，所有传递的会与已审核过的判断，新的仓库进行审核
 	Weight1             float64               `json:"weight1"`             // 重量1 (KG,LB)，有仓库已审核的不可改
@@ -69,7 +69,7 @@ func (m UpdateProductRequest) Validate() error {
 		),
 		validation.Field(&m.SkuId, validation.Required.Error("系统主键不能为空")),
 		validation.Field(&m.SkuNameEN, validation.Required.Error("商品英文名不能为空")),
-		validation.Field(&m.Typ,
+		validation.Field(&m.Type,
 			validation.Required.Error("类型不能为空"),
 			validation.In(1, 2).Error("无效的类型"),
 		),
@@ -97,13 +97,13 @@ type ProductsQueryParams struct {
 	auditStatus []string `url:"audit_status,omitempty"`
 	omsSku      string   `url:"omsSku,omitempty"` // 系统显示SKU（用户自定义）
 	Status      int      `url:"status,omitempty"` // 状态：1-active, 2-frozen, 3-archive
-	Typ         int      `url:"type,omitempty"`   // 类型 1.单个产品 2.组合产品 类型不传表示所有
+	Type        int      `url:"type,omitempty"`   // 类型 1.单个产品 2.组合产品 类型不传表示所有
 }
 
 func (m ProductsQueryParams) Validate() error {
 	return validation.ValidateStruct(&m,
 		validation.Field(&m.Status, validation.When(!validation.IsEmpty(m.Status), validation.In(1, 2, 3).Error("无效的状态"))),
-		validation.Field(&m.Typ, validation.When(!validation.IsEmpty(m.Typ), validation.In(1, 2).Error("无效的类型"))),
+		validation.Field(&m.Type, validation.When(!validation.IsEmpty(m.Type), validation.In(1, 2).Error("无效的类型"))),
 	)
 }
 
