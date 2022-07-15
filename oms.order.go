@@ -47,8 +47,8 @@ type BulkOrderResultFulfill struct {
 type BulkOrderSummary struct {
 	Age           int    `json:"age,omitempty"`
 	CreateTime    string `json:"createTime,omitempty"`
-	NoteFromBuyer string `json:"note_from_buyer,omitempty"` // 顾客备注
-	OrderDate     string `json:"orderDate"`                 // 订单创建时间,格式:yyyy-MM-dd HH:mm:ss
+	NoteFromBuyer string `json:"noteFromBuyer,omitempty"` // 顾客备注
+	OrderDate     string `json:"orderDate"`               // 订单创建时间（格式：yyyy-MM-dd HH:mm:ss）
 }
 
 func (m BulkOrderSummary) Validate() error {
@@ -84,11 +84,11 @@ func (m BulkShipmentFormOutboundLabel) Validate() error {
 
 // BulkShipmentFormOutboundInfo 出库单信息
 type BulkShipmentFormOutboundInfo struct {
-	AdditionService       []string                      `json:"additionService,omitempty"`       // 附加服务
-	Remark                string                        `json:"remark,omitempty"`                // 备注
-	ShipmentOutboundLabel BulkShipmentFormOutboundLabel `json:"shipmentOutboundLabel,omitempty"` // label 信息
-	SysServiceId          string                        `json:"sysServiceId"`                    // 运输类型 6.客户自己上传物流单号和运单地址 7.不需要打单（客户去仓库自提） 9.使用仓库选择的服务,即要打物流单
-	TrackingNumber        string                        `json:"trackingNumber,omitempty"`        // 物流跟踪号
+	AdditionService []string `json:"additionService,omitempty"` // 附加服务
+	Remark          string   `json:"remark,omitempty"`          // 备注
+	Shipme          ntOutboundLabel BulkShipmentFormOutboundLabel `json:"shipmentOutboundLabel,omitempty"` // label 信息
+	SysServiceId          string                        `json:"sysServiceId"`                              // 运输类型（6：客户自己上传物流单号和运单地址、7：不需要打单（客户去仓库自提）、9：使用仓库选择的服务，即要打物流单）
+	TrackingNumber        string                        `json:"trackingNumber,omitempty"`                  // 物流跟踪号
 }
 
 func (m BulkShipmentFormOutboundInfo) Validate() error {
@@ -104,7 +104,7 @@ func (m BulkShipmentFormOutboundInfo) Validate() error {
 
 // BulkShipmentFormProduct 发货单产品列表
 type BulkShipmentFormProduct struct {
-	OmsSku   string  `json:"omsSku"`          // 产品 SKU (skuId和omsSku至少传一个)
+	OmsSku   string  `json:"omsSku"`          // 产品 SKU (skuId 和 omsSku 至少传一个)
 	Price    float64 `json:"price,omitempty"` // 单价
 	Quantity int     `json:"qty"`             // 数量
 	SkuId    string  `json:"skuId"`           // 系统产品主键
@@ -120,10 +120,10 @@ func (m BulkShipmentFormProduct) Validate() error {
 
 // BulkShipmentFormShippingInfo 发货单基本信息
 type BulkShipmentFormShippingInfo struct {
-	CarrierId     int    `json:"carrierId"`     // 运输商: 1. USPS 2. UPS 3. FedEx 4. DHL 9. Other
+	CarrierId     int    `json:"carrierId"`     // 运输商（1：USPS、2：UPS、3：FedEx、4：DHL、9：Other）
 	ShipDate      string `json:"shipDate"`      // 计划执运日期，即计划发货日期，格式：“yyyy-MM-dd 00:00:00”
 	ShipmentSid   string `json:"shipmentSid"`   // shipment 序号
-	SignatureType int    `json:"signatureType"` // 签名类型：1.Indirect (FedEx,UPS only) 2.DIRECT 3.ADULT 4.SERVICE_DEFAULT(default)
+	SignatureType int    `json:"signatureType"` // 签名类型（1：Indirect (FedEx,UPS only)、2：DIRECT、3：ADULT、4：SERVICE_DEFAULT(default)）
 }
 
 func (m BulkShipmentFormShippingInfo) Validate() error {
@@ -137,7 +137,10 @@ func (m BulkShipmentFormShippingInfo) Validate() error {
 			validation.Date(constant.DatetimeFormat).Error("无效的计划发货日期格式"),
 		),
 		validation.Field(&m.ShipmentSid, validation.Required.Error("shipment 序号不能为空")),
-		validation.Field(&m.SignatureType, validation.Required.Error("签名类型不能为空"), validation.In(1, 2, 3, 4).Error("无效的签名类型")),
+		validation.Field(&m.SignatureType,
+			validation.Required.Error("签名类型不能为空"),
+			validation.In(1, 2, 3, 4).Error("无效的签名类型"),
+		),
 	)
 }
 
@@ -189,7 +192,7 @@ type BulkOrderRequest struct {
 	OrderNo       string             `json:"orderNo,omitempty"` // openapi 允许客户传入的订单编号
 	OrderSummary  BulkOrderSummary   `json:"orderSummary"`      // 订单摘要
 	ShipmentForms []BulkShipmentForm `json:"shipmentForms"`     // 执运信息，即发货表单
-	SID           int                `json:"sid"`               // 当前请求序号，当前请求内不能重复; 是批量传订单的一个标识,只当前请求有效，无业务含义
+	SID           int                `json:"sid"`               // 当前请求序号，当前请求内不能重复; 是批量传订单的一个标识，只当前请求有效，无业务含义
 	ToAddress     BulkToAddress      `json:"toAddress"`         // 收货地址
 	WarehouseId   string             `json:"warehouseId"`       // 仓库 ID
 }
@@ -224,6 +227,7 @@ func (m BulkOrderRequests) Validate() error {
 							if !ok {
 								return errors.New("无效的发货单数据")
 							}
+
 							return validation.ValidateStruct(&form,
 								validation.Field(&form.International),
 								validation.Field(&form.OutboundInfo),
@@ -234,8 +238,10 @@ func (m BulkOrderRequests) Validate() error {
 										if !ok {
 											return errors.New("无效的发货单商品")
 										}
+
 										return validation.ValidateStruct(&product,
-											validation.Field(&product.SkuId, validation.Required.Error("系统产品主键不能为空")),
+											validation.Field(&product.SkuId, validation.When(product.OmsSku == "", validation.Required.Error("系统产品主键不能为空"))),
+											validation.Field(&product.OmsSku, validation.When(product.SkuId == "", validation.Required.Error("产品 SKU 不能为空"))),
 											validation.Field(&product.Quantity, validation.Min(1).Error("商品数量不能少于 {{.threshold}}")),
 											validation.Field(&product.Price, validation.Min(0.0).Error("商品价格不能小于 {{.threshold}}")),
 										)
