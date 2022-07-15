@@ -84,11 +84,11 @@ func (m BulkShipmentFormOutboundLabel) Validate() error {
 
 // BulkShipmentFormOutboundInfo 出库单信息
 type BulkShipmentFormOutboundInfo struct {
-	AdditionService []string `json:"additionService,omitempty"` // 附加服务
-	Remark          string   `json:"remark,omitempty"`          // 备注
-	Shipme          ntOutboundLabel BulkShipmentFormOutboundLabel `json:"shipmentOutboundLabel,omitempty"` // label 信息
-	SysServiceId          string                        `json:"sysServiceId"`                              // 运输类型（6：客户自己上传物流单号和运单地址、7：不需要打单（客户去仓库自提）、9：使用仓库选择的服务，即要打物流单）
-	TrackingNumber        string                        `json:"trackingNumber,omitempty"`                  // 物流跟踪号
+	AdditionService       []string                      `json:"additionService,omitempty"`       // 附加服务
+	Remark                string                        `json:"remark,omitempty"`                // 备注
+	ShipmentOutboundLabel BulkShipmentFormOutboundLabel `json:"shipmentOutboundLabel,omitempty"` // label 信息
+	SysServiceId          string                        `json:"sysServiceId"`                    // 运输类型（6：客户自己上传物流单号和运单地址、7：不需要打单（客户去仓库自提）、9：使用仓库选择的服务，即要打物流单）
+	TrackingNumber        string                        `json:"trackingNumber,omitempty"`        // 物流跟踪号
 }
 
 func (m BulkShipmentFormOutboundInfo) Validate() error {
