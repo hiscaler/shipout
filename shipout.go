@@ -52,10 +52,15 @@ func NewShipOut(config config.Config) *ShipOut {
 		SetAllowGetMethodPayload(true).
 		SetTimeout(10 * time.Second).
 		OnBeforeRequest(func(client *resty.Client, request *resty.Request) error {
+			path := request.URL
+			qp := request.QueryParam.Encode()
+			if qp != "" {
+				path += "?" + qp
+			}
 			headers := map[string]string{
 				"timestamp": strconv.Itoa(int(time.Now().UnixMicro())),
 				"version":   "1.0.0",
-				"path":      request.URL,
+				"path":      path,
 			}
 			keys := make([]string, len(headers))
 			i := 0
