@@ -2,7 +2,7 @@ package entity
 
 type ProductRecordSkuAlias struct {
 	OmsSku  string `json:"omsSku"`  // 系统 SKU
-	sku     string `json:"sku"`     // 店铺 SKU
+	Sku     string `json:"sku"`     // 店铺 SKU
 	StoreId string `json:"storeId"` // 店铺 Id
 }
 
