@@ -106,11 +106,7 @@ func (s productService) Bulk(req BulkProductRequest) (err error) {
 		return
 	}
 
-	res := struct {
-		NormalResponse
-		Data []BulkOrderResult `json:"data"`
-	}{}
-	resp, err := s.httpClient.R().
+	_, err = s.httpClient.R().
 		SetBody(req).
 		Post("/open-api/oms/product/batchCreate")
 	if err != nil {
